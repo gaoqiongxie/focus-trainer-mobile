@@ -5,6 +5,12 @@ import '../providers/training_provider.dart';
 import '../providers/reward_provider.dart';
 import 'training_screen.dart';
 import 'profile_screen.dart';
+import 'game_selection_screen.dart';
+import 'games/schulte_grid_screen.dart';
+import 'games/flash_number_screen.dart';
+import 'games/card_match_screen.dart';
+import 'games/sound_sequence_screen.dart';
+import 'parent/parent_report_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,19 +19,10 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  final List<Map<String, dynamic>> _trainingModules = [
-    {'type': 1, 'name': '专注时长', 'icon': Icons.timer, 'color': const Color(0xFF4A90D9), 'desc': '提升持续注意力'},
-    {'type': 2, 'name': '视觉追踪', 'icon': Icons.visibility, 'color': const Color(0xFF50C878), 'desc': '增强视觉专注力'},
-    {'type': 3, 'name': '听觉专注', 'icon': Icons.headphones, 'color': const Color(0xFFFF6B6B), 'desc': '提升听觉注意力'},
-    {'type': 4, 'name': '记忆训练', 'icon': Icons.memory, 'color': const Color(0xFFFFB347), 'desc': '强化工作记忆'},
-  ];
-
+class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
     _loadData();
   }
 
@@ -35,12 +32,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       context.read<RewardProvider>().loadStreak(),
       context.read<TrainingProvider>().loadStatistics('week'),
     ]);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
   }
 
   @override
@@ -100,6 +91,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               ),
             ),
           ),
+          const SliverToBoxAdapter(child: SizedBox(height: 8)),
           SliverToBoxAdapter(child: _buildQuickActions()),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
         ],
@@ -134,13 +126,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _buildQuickCard('🎯', '5分钟\n专注', 1, 1, 300),
+                _buildQuickCard('🎯', '舒尔特\n方格', 'schulte'),
                 const SizedBox(width: 12),
-                _buildQuickCard('👁️', '视觉\n训练', 2, 1, 300),
+                _buildQuickCard('⚡', '数字\n闪现', 'flash'),
                 const SizedBox(width: 12),
-                _buildQuickCard('🎧', '听觉\n训练', 3, 1, 300),
+                _buildQuickCard('🃏', '卡片\n配对', 'match'),
                 const SizedBox(width: 12),
-                _buildQuickCard('🧠', '记忆\n训练', 4, 1, 300),
+                _buildQuickCard('🎵', '声音\n序列', 'sound'),
+                const SizedBox(width: 12),
+                _buildQuickCard('⏱️', '专注\n计时', 'focus'),
               ],
             ),
           ),
@@ -149,9 +143,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildQuickCard(String emoji, String label, int type, int level, int duration) {
+  Widget _buildQuickCard(String emoji, String label, String gameType) {
     return InkWell(
-      onTap: () => _navigateToTraining(type, level, duration),
+      onTap: () => _navigateToGame(gameType, 1),
       borderRadius: BorderRadius.circular(16),
       child: Container(
         width: 100,
@@ -172,6 +166,41 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 
   Widget _buildTrainingGrid() {
+    final modules = [
+      {
+        'type': 'visual',
+        'name': '视觉追踪',
+        'icon': Icons.visibility,
+        'color': const Color(0xFF50C878),
+        'desc': '舒尔特方格 · 数字闪现',
+        'games': ['schulte', 'flash'],
+      },
+      {
+        'type': 'auditory',
+        'name': '听觉专注',
+        'icon': Icons.headphones,
+        'color': const Color(0xFFFF6B6B),
+        'desc': '声音序列记忆',
+        'games': ['sound'],
+      },
+      {
+        'type': 'memory',
+        'name': '记忆训练',
+        'icon': Icons.memory,
+        'color': const Color(0xFFFFB347),
+        'desc': '卡片配对 · 翻牌记忆',
+        'games': ['match'],
+      },
+      {
+        'type': 'focus',
+        'name': '专注时长',
+        'icon': Icons.timer,
+        'color': const Color(0xFF4A90D9),
+        'desc': '计时专注 · 持续训练',
+        'games': ['focus'],
+      },
+    ];
+
     return GridView.builder(
       padding: const EdgeInsets.all(16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -180,9 +209,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
       ),
-      itemCount: _trainingModules.length,
+      itemCount: modules.length,
       itemBuilder: (context, index) {
-        final module = _trainingModules[index];
+        final module = modules[index];
         return _buildTrainingCard(module);
       },
     );
@@ -193,7 +222,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: InkWell(
-        onTap: () => _navigateToTraining(module['type'], 1, 300),
+        onTap: () => _navigateToGameSelection(module['games'], module['name']),
         borderRadius: BorderRadius.circular(20),
         child: Container(
           padding: const EdgeInsets.all(20),
@@ -227,10 +256,39 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
-  void _navigateToTraining(int type, int level, int duration) {
+  void _navigateToGame(String gameType, int level) {
+    switch (gameType) {
+      case 'schulte':
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => SchulteGridScreen(level: level)));
+        break;
+      case 'flash':
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => FlashNumberScreen(level: level)));
+        break;
+      case 'match':
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => CardMatchScreen(level: level)));
+        break;
+      case 'sound':
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => SoundSequenceScreen(level: level)));
+        break;
+      case 'focus':
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => TrainingScreen(trainingType: 1, level: level, duration: level == 1 ? 300 : (level == 2 ? 600 : 900)),
+        ));
+        break;
+    }
+  }
+
+  void _navigateToGameSelection(List<dynamic> games, String title) {
+    if (games.length == 1) {
+      _navigateToGame(games.first, 1);
+      return;
+    }
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => TrainingScreen(trainingType: type, level: level, duration: duration),
+        builder: (_) => GameSelectionScreen(
+          games: games.cast<String>(),
+          title: title,
+        ),
       ),
     );
   }
@@ -242,10 +300,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       unselectedItemColor: Colors.grey,
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: '首页'),
+        BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: '报告'),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: '我的'),
       ],
       onTap: (index) {
         if (index == 1) {
+          Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ParentReportScreen()));
+        } else if (index == 2) {
           Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProfileScreen()));
         }
       },

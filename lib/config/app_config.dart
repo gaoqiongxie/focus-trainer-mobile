@@ -1,3 +1,6 @@
+import 'dart:ui';
+import 'package:flutter/material.dart';
+
 class AppConfig {
   static const String appName = '专注力训练';
   
@@ -27,6 +30,3 @@ class AppConfig {
   static const Color primaryColor = Color(0xFF4A90D9);
   static const Color secondaryColor = Color(0xFF6C63FF);
 }
-
-import 'dart:ui';
-import 'package:flutter/material.dart';

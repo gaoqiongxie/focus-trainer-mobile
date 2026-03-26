@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/reward_provider.dart';
 import '../providers/training_provider.dart';
+import 'login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -117,7 +118,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 onPressed: () async {
                   await user.logout();
                   if (!mounted) return;
-                  Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    (route) => false,
+                  );
                 },
                 icon: const Icon(Icons.logout, color: Colors.red),
                 label: const Text('退出登录', style: TextStyle(color: Colors.red)),
@@ -194,7 +198,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildBadgeItem(Map<String, dynamic> badge) {
-    final earned = badge['earned'] as bool;
+    final earned = badge['earned'] == true;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(

@@ -12,7 +12,7 @@ import 'config/app_config.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  
+  HttpUtil.init();
   runApp(const FocusTrainerApp());
 }
 

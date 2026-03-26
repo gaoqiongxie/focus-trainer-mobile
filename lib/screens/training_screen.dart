@@ -70,15 +70,24 @@ class _TrainingScreenState extends State<TrainingScreen> with TickerProviderStat
       setState(() {
         _remainingSeconds--;
         if (_remainingSeconds <= 0) {
-          _completeTraining();
+          _timer?.cancel();
         }
       });
+      if (_remainingSeconds <= 0) {
+        // 在setState外部调用异步方法，避免Timer竞态
+        _completeTraining();
+      }
     });
   }
 
   Future<void> _completeTraining() async {
     _timer?.cancel();
-    
+
+    if (_record == null) {
+      // 如果record尚未初始化（用户在API返回前点了提前完成），忽略
+      return;
+    }
+
     final actualDuration = widget.duration - _remainingSeconds;
     // 模拟正确率和分数（实际应由训练逻辑计算）
     final accuracy = 75.0 + (_interruptCount == 0 ? 15.0 : 0.0);

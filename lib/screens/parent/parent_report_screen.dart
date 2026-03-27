@@ -415,8 +415,10 @@ class _ParentReportScreenState extends State<ParentReportScreen>
     }
 
     // 计算最大值用于归一化
-    final maxDuration = trend.map((d) => (d['totalDuration'] as int?) ?? 0).reduce((a, b) => a > b ? a : b).toDouble();
-    final maxCount = trend.map((d) => (d['totalCount'] as int?) ?? 0).reduce((a, b) => a > b ? a : b).toDouble();
+    final durationList = trend.map((d) => (d['totalDuration'] as int?) ?? 0).toList();
+    final maxDuration = durationList.isEmpty ? 0.0 : durationList.reduce((a, b) => a > b ? a : b).toDouble();
+    final countList = trend.map((d) => (d['totalCount'] as int?) ?? 0).toList();
+    final maxCount = countList.isEmpty ? 0.0 : countList.reduce((a, b) => a > b ? a : b).toDouble();
 
     return RefreshIndicator(
       onRefresh: () async {

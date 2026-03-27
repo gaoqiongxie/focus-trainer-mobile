@@ -205,7 +205,10 @@ class _SoundSequenceScreenState extends State<SoundSequenceScreen>
     // 检查当前输入是否正确
     final currentInputIndex = _userSequence.length - 1;
     if (_userSequence[currentInputIndex] != _currentSequence[currentInputIndex]) {
-      // 输入错误 - 延迟后显示结果
+      // 输入错误 - 锁定输入，防止延迟期间继续点击
+      setState(() {
+        _phase = 'submitting';
+      });
       Future.delayed(const Duration(milliseconds: 500), () {
         if (!mounted) return;
         _submitRoundResult();

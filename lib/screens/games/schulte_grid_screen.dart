@@ -73,8 +73,9 @@ class _SchulteGridScreenState extends State<SchulteGridScreen
     final rng = Random();
     for (int i = _numbers.length - 1; i > 0; i--) {
       final j = rng.nextInt(i + 1);
+      final temp = _numbers[i];
       _numbers[i] = _numbers[j];
-      _numbers[j] = _numbers[i];
+      _numbers[j] = temp;
     }
     _tappedNumbers = [];
     _nextNumber = 1;
@@ -205,7 +206,9 @@ class _SchulteGridScreenState extends State<SchulteGridScreen
       _isPlaying = false;
       _isCompleted = true;
     });
-    _resultAnimController.forward();
+    if (mounted) {
+      _resultAnimController.forward();
+    }
   }
 
   void _restartGame() {

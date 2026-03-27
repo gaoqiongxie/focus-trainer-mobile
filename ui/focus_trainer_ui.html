@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Focus Trainer — 系统UI设计图</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#0f1117;color:#fff;overflow-x:hidden}
+  
+  /* ===== 顶部标题 ===== */
+  .page-header{background:linear-gradient(135deg,#4A90D9,#6C63FF);padding:40px 60px;text-align:center}
+  .page-header h1{font-size:32px;font-weight:700;letter-spacing:2px;margin-bottom:8px}
+  .page-header p{font-size:14px;opacity:.8}
+  
+  /* ===== 设计规范区 ===== */
+  .design-system{padding:40px 60px;background:#16181f}
+  .section-title{font-size:20px;font-weight:700;margin-bottom:24px;color:#4A90D9;border-left:4px solid #4A90D9;padding-left:12px}
+  
+  .token-row{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:20px}
+  
+  .color-chip{display:flex;flex-direction:column;align-items:center;gap:8px}
+  .color-block{width:70px;height:70px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+  .color-label{font-size:11px;color:#aaa;text-align:center}
+  .color-hex{font-size:10px;color:#666}
+  
+  .type-sample{background:#1e2028;border-radius:8px;padding:16px 20px;margin-bottom:12px}
+  .ts-h1{font-size:28px;font-weight:700;color:#fff;line-height:1.2}
+  .ts-h2{font-size:22px;font-weight:600;color:#fff;line-height:1.3}
+  .ts-h3{font-size:18px;font-weight:500;color:#fff;line-height:1.4}
+  .ts-body{font-size:15px;color:#ccc;line-height:1.5}
+  .ts-caption{font-size:12px;color:#888;line-height:1.4}
+  
+  /* ===== 手机框架 ===== */
+  .screens-area{padding:40px 40px 60px;background:#0f1117}
+  .screens-grid{display:grid;grid-template-columns:repeat(auto-fill,320px);gap:48px;justify-content:center}
+  
+  .phone-frame{
+    width:320px;
+    background:#1a1a2e;
+    border-radius:36px;
+    padding:14px;
+    box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.08);
+    position:relative;
+  }
+  .phone-notch{width:100px;height:22px;background:#111;border-radius:0 0 16px 16px;margin:0 auto 4px;position:relative;z-index:10}
+  .phone-screen{background:#fff;border-radius:24px;overflow:hidden;height:580px;position:relative}
+  .phone-label{text-align:center;margin-top:14px;font-size:13px;font-weight:600;color:#aaa;letter-spacing:.5px}
+  .phone-sub{text-align:center;font-size:11px;color:#555;margin-top:3px}
+  
+  /* ===== 通用UI组件 ===== */
+  .status-bar{height:22px;background:inherit;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:10px;font-weight:600}
+  
+  /* ===== 页面1: 登录页 ===== */
+  .login-screen{background:linear-gradient(160deg,#4A90D9 0%,#6C63FF 60%,#a78bfa 100%);height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:50px}
+  .login-logo{width:80px;height:80px;background:rgba(255,255,255,.2);border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:16px;backdrop-filter:blur(10px)}
+  .login-title{font-size:26px;font-weight:700;color:#fff;margin-bottom:6px}
+  .login-subtitle{font-size:13px;color:rgba(255,255,255,.7);margin-bottom:48px}
+  .login-card{background:rgba(255,255,255,.95);border-radius:24px;padding:28px 24px;width:calc(100% - 32px)}
+  .input-label{font-size:12px;color:#666;margin-bottom:6px;font-weight:500}
+  .input-box{width:100%;height:44px;background:#f5f6fa;border-radius:10px;border:1.5px solid #e8eaed;padding:0 14px;font-size:14px;color:#333;margin-bottom:16px;display:flex;align-items:center;color:#999}
+  .input-box.focused{border-color:#4A90D9;background:#f0f6ff}
+  .btn-login{width:100%;height:48px;background:linear-gradient(90deg,#4A90D9,#6C63FF);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:600;margin-top:8px}
+  .login-footer{font-size:12px;color:#888;text-align:center;margin-top:16px}
+  .login-footer span{color:#4A90D9}
+  
+  /* ===== 页面2: 首页 ===== */
+  .home-screen{background:#f0f2f8;height:100%;display:flex;flex-direction:column}
+  .home-header{background:linear-gradient(135deg,#4A90D9,#6C63FF);padding:16px 18px 24px;position:relative;overflow:hidden}
+  .home-header::after{content:'';position:absolute;bottom:-20px;left:-10px;right:-10px;height:40px;background:#f0f2f8;border-radius:50%}
+  .home-user-row{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  .home-avatar{width:44px;height:44px;background:rgba(255,255,255,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px}
+  .home-username{font-size:16px;font-weight:600;color:#fff}
+  .home-date{font-size:11px;color:rgba(255,255,255,.7)}
+  .home-stats{display:flex;gap:8px}
+  .home-stat{flex:1;background:rgba(255,255,255,.18);border-radius:12px;padding:10px 8px;text-align:center;backdrop-filter:blur(6px)}
+  .home-stat-num{font-size:20px;font-weight:700;color:#fff}
+  .home-stat-icon{font-size:18px}
+  .home-stat-label{font-size:10px;color:rgba(255,255,255,.75);margin-top:2px}
+  
+  .home-content{flex:1;padding:20px 14px 8px;overflow-y:auto}
+  .home-section-title{font-size:15px;font-weight:700;color:#333;margin-bottom:12px}
+  .home-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+  .training-card{border-radius:16px;padding:14px;display:flex;flex-direction:column;cursor:pointer;position:relative;overflow:hidden}
+  .training-card::before{content:'';position:absolute;top:-20px;right:-20px;width:70px;height:70px;border-radius:50%;opacity:.15;background:#fff}
+  .tc-icon{font-size:28px;margin-bottom:8px}
+  .tc-name{font-size:13px;font-weight:700;color:#fff;line-height:1.3}
+  .tc-desc{font-size:10px;color:rgba(255,255,255,.8);margin-top:3px;line-height:1.3}
+  .tc-tag{font-size:9px;background:rgba(255,255,255,.25);color:#fff;padding:2px 7px;border-radius:99px;width:fit-content;margin-top:6px}
+  .tc1{background:linear-gradient(135deg,#4A90D9,#5ba8ef)}
+  .tc2{background:linear-gradient(135deg,#6C63FF,#8b83ff)}
+  .tc3{background:linear-gradient(135deg,#FF6B6B,#ff8e8e)}
+  .tc4{background:linear-gradient(135deg,#43C59E,#5dd9b5)}
+  
+  .quick-card{background:linear-gradient(90deg,#4A90D9,#6C63FF);border-radius:14px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .qc-text{font-size:14px;font-weight:600;color:#fff}
+  .qc-sub{font-size:11px;color:rgba(255,255,255,.75);margin-top:2px}
+  .qc-btn{background:rgba(255,255,255,.25);border-radius:20px;padding:6px 14px;font-size:12px;color:#fff;font-weight:600;backdrop-filter:blur(4px)}
+  
+  .home-bottom-nav{height:54px;background:#fff;display:flex;align-items:center;justify-content:space-around;border-top:1px solid #eee}
+  .nav-item{display:flex;flex-direction:column;align-items:center;gap:2px}
+  .nav-icon{font-size:20px;color:#bbb}
+  .nav-icon.active{color:#4A90D9}
+  .nav-text{font-size:9px;color:#bbb}
+  .nav-text.active{color:#4A90D9;font-weight:600}
+  
+  /* ===== 页面3: 游戏选择 ===== */
+  .sel-screen{background:#f0f2f8;height:100%;display:flex;flex-direction:column}
+  .sel-appbar{background:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 0 #eee}
+  .sel-back{font-size:18px;color:#333}
+  .sel-title{font-size:16px;font-weight:700;color:#333}
+  .sel-content{flex:1;padding:16px;overflow-y:auto}
+  .sel-category{background:#fff;border-radius:14px;margin-bottom:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+  .sel-cat-header{padding:12px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f0f0f0}
+  .sel-cat-icon{font-size:22px}
+  .sel-cat-name{font-size:14px;font-weight:600;color:#333}
+  .sel-cat-desc{font-size:11px;color:#888}
+  .sel-game{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #f8f8f8}
+  .sel-game:last-child{border-bottom:none}
+  .sel-game-name{font-size:13px;font-weight:600;color:#333}
+  .sel-game-desc{font-size:11px;color:#888}
+  .sel-levels{display:flex;gap:6px}
+  .sel-level-btn{padding:4px 10px;border-radius:20px;font-size:10px;font-weight:600;border:1.5px solid #4A90D9;color:#4A90D9;background:#f0f6ff}
+  .sel-level-btn.easy{border-color:#43C59E;color:#43C59E;background:#f0fdf8}
+  .sel-level-btn.mid{border-color:#4A90D9;color:#4A90D9;background:#f0f6ff}
+  .sel-level-btn.hard{border-color:#6C63FF;color:#6C63FF;background:#f5f0ff}
+  
+  /* ===== 页面4: 舒尔特方格 ===== */
+  .schulte-screen{background:#f0f2f8;height:100%;display:flex;flex-direction:column}
+  .schulte-header{background:linear-gradient(135deg,#4A90D9,#6C63FF);padding:14px 16px 18px}
+  .schulte-hrow{display:flex;align-items:center;justify-content:space-between}
+  .schulte-htitle{font-size:15px;font-weight:700;color:#fff}
+  .schulte-badge{background:rgba(255,255,255,.2);border-radius:99px;padding:3px 10px;font-size:11px;color:#fff}
+  .schulte-stats{display:flex;gap:8px;margin-top:12px}
+  .schulte-stat{flex:1;background:rgba(255,255,255,.18);border-radius:10px;padding:8px;text-align:center}
+  .schulte-stat-val{font-size:18px;font-weight:700;color:#fff}
+  .schulte-stat-label{font-size:9px;color:rgba(255,255,255,.8);margin-top:1px}
+  .schulte-body{flex:1;padding:16px;display:flex;flex-direction:column;align-items:center}
+  .schulte-progress{font-size:13px;color:#666;margin-bottom:12px;font-weight:500}
+  .schulte-grid{display:grid;gap:6px;margin-bottom:12px}
+  .schulte-cell{background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#333;box-shadow:0 2px 8px rgba(0,0,0,.1);cursor:pointer;transition:all .15s}
+  .schulte-cell.correct{background:linear-gradient(135deg,#43C59E,#5dd9b5);color:#fff;transform:scale(.95)}
+  .schulte-cell.wrong{background:linear-gradient(135deg,#FF6B6B,#ff8e8e);color:#fff}
+  .schulte-cell.current{border:2.5px solid #4A90D9}
+  
+  /* ===== 页面5: 数字闪现 ===== */
+  .flash-screen{background:#0a0e1a;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:16px}
+  .flash-top{width:100%;display:flex;justify-content:space-between;align-items:center}
+  .flash-back{color:#aaa;font-size:18px}
+  .flash-round{font-size:13px;color:#aaa}
+  .flash-main{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:20px}
+  .flash-prompt{font-size:14px;color:#aaa;text-align:center}
+  .flash-number-display{background:linear-gradient(135deg,#1e2a4a,#252d50);border-radius:20px;padding:30px 40px;border:2px solid rgba(74,144,217,.3)}
+  .flash-number{font-size:48px;font-weight:700;color:#4A90D9;letter-spacing:8px;font-variant-numeric:tabular-nums}
+  .flash-countdown{font-size:30px;color:#6C63FF;font-weight:700}
+  .flash-keyboard{width:100%;background:rgba(255,255,255,.05);border-radius:16px;padding:12px}
+  .flash-kb-row{display:flex;gap:8px;margin-bottom:8px;justify-content:center}
+  .flash-kb-btn{flex:1;max-width:60px;height:44px;background:rgba(255,255,255,.1);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;color:#fff}
+  .flash-kb-btn.special{background:rgba(74,144,217,.3);color:#4A90D9}
+  .flash-input-display{background:rgba(255,255,255,.08);border-radius:12px;padding:10px 20px;text-align:center;margin-bottom:10px;font-size:24px;font-weight:700;color:#fff;letter-spacing:6px;min-height:44px}
+  
+  /* ===== 页面6: 卡片配对 ===== */
+  .card-screen{background:#f5f0ff;height:100%;display:flex;flex-direction:column}
+  .card-header{background:linear-gradient(135deg,#6C63FF,#8b83ff);padding:14px 16px 18px}
+  .card-stats{display:flex;gap:8px;margin-top:10px}
+  .card-stat{flex:1;background:rgba(255,255,255,.18);border-radius:10px;padding:7px;text-align:center}
+  .card-body{flex:1;padding:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+  .card-tile{border-radius:10px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;transition:all .3s}
+  .card-tile.back{background:linear-gradient(135deg,#6C63FF,#8b83ff)}
+  .card-tile.front{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+  .card-tile.matched{background:linear-gradient(135deg,#43C59E,#5dd9b5)}
+  .card-tile.back::after{content:'⭐';font-size:16px;opacity:.5}
+  
+  /* ===== 页面7: 声音序列 ===== */
+  .sound-screen{background:#0f2027;height:100%;display:flex;flex-direction:column;align-items:center;padding:16px}
+  .sound-header{width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+  .sound-title{font-size:16px;font-weight:700;color:#fff}
+  .sound-phase{font-size:12px;background:#43C59E22;color:#43C59E;padding:3px 10px;border-radius:20px}
+  .sound-sequence{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:24px;padding:16px;background:rgba(255,255,255,.05);border-radius:16px;width:100%}
+  .sound-item{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;background:rgba(255,255,255,.1);border:2px solid transparent;position:relative}
+  .sound-item.playing{border-color:#43C59E;background:rgba(67,197,158,.2);animation:pulse 0.5s ease-in-out}
+  .sound-item.selected{border-color:#4A90D9;background:rgba(74,144,217,.2)}
+  .sound-label{font-size:13px;color:#aaa;text-align:center;margin-bottom:12px}
+  .sound-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%}
+  .sound-btn{border-radius:14px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12)}
+  .sound-btn-emoji{font-size:26px}
+  .sound-btn-label{font-size:9px;color:#aaa}
+  .sound-btn.active{background:rgba(67,197,158,.15);border-color:#43C59E}
+  .sound-progress{display:flex;gap:6px;margin-top:auto;padding-top:10px}
+  .sound-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2)}
+  .sound-dot.filled{background:#4A90D9}
+  
+  /* ===== 页面8: 游戏结果 ===== */
+  .result-screen{background:#f0f2f8;height:100%;display:flex;flex-direction:column;align-items:center;padding:20px 16px}
+  .result-icon{font-size:64px;margin-bottom:8px;margin-top:16px}
+  .result-title{font-size:22px;font-weight:700;color:#333;margin-bottom:6px}
+  .result-sub{font-size:13px;color:#888;margin-bottom:20px}
+  .result-stars{display:flex;gap:6px;margin-bottom:20px}
+  .result-star{font-size:32px}
+  .result-card{background:#fff;border-radius:20px;padding:20px;width:100%;box-shadow:0 4px 20px rgba(0,0,0,.08);margin-bottom:16px}
+  .result-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f5f5f5}
+  .result-row:last-child{border-bottom:none}
+  .result-key{font-size:13px;color:#888}
+  .result-val{font-size:14px;font-weight:700;color:#333}
+  .result-btns{display:flex;gap:10px;width:100%}
+  .result-btn{flex:1;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600}
+  .result-btn.secondary{background:#f0f2f8;color:#666}
+  .result-btn.primary{background:linear-gradient(90deg,#4A90D9,#6C63FF);color:#fff}
+  
+  /* ===== 页面9: 家长报告 ===== */
+  .report-screen{background:#F8F9FE;height:100%;display:flex;flex-direction:column}
+  .report-appbar{background:#fff;padding:14px 16px 0;box-shadow:none;border-bottom:1px solid #eee}
+  .report-title-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .report-title{font-size:17px;font-weight:700;color:#333}
+  .report-refresh{font-size:18px;color:#4A90D9}
+  .report-tabs{display:flex;border-bottom:2px solid #eee}
+  .report-tab{flex:1;text-align:center;padding:10px 0;font-size:13px;color:#aaa;position:relative}
+  .report-tab.active{color:#4A90D9;font-weight:600}
+  .report-tab.active::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:2px;background:#4A90D9}
+  .report-content{flex:1;padding:14px;overflow-y:auto}
+  .report-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .report-sum-card{background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+  .report-sum-num{font-size:24px;font-weight:700;color:#4A90D9}
+  .report-sum-unit{font-size:11px;color:#aaa;margin-left:2px}
+  .report-sum-label{font-size:11px;color:#888;margin-top:3px}
+  .report-section-title{font-size:13px;font-weight:700;color:#333;margin:12px 0 8px}
+  .report-ability-bar{background:#fff;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:10px}
+  .report-ab-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .report-ab-label{font-size:11px;color:#666;width:48px;flex-shrink:0}
+  .report-ab-track{flex:1;height:8px;background:#f0f0f0;border-radius:99px;overflow:hidden}
+  .report-ab-fill{height:100%;border-radius:99px}
+  .report-ab-val{font-size:11px;font-weight:700;width:30px;text-align:right}
+  
+  /* ===== 流程图区 ===== */
+  .flow-area{padding:40px 40px 60px;background:#13151e}
+  .flow-container{max-width:1200px;margin:0 auto}
+  .flow-title{font-size:20px;font-weight:700;color:#4A90D9;border-left:4px solid #4A90D9;padding-left:12px;margin-bottom:32px}
+  .flow-graph{display:flex;flex-direction:column;gap:0}
+  
+  /* 流程图节点 */
+  .flow-row{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap}
+  .flow-node{
+    background:#1e2235;
+    border:1.5px solid rgba(74,144,217,.3);
+    border-radius:14px;
+    padding:10px 16px;
+    text-align:center;
+    min-width:100px;
+    position:relative;
+  }
+  .flow-node.start{background:linear-gradient(135deg,#4A90D9,#6C63FF);border:none;color:#fff}
+  .flow-node.game{background:linear-gradient(135deg,#1e2235,#252d50);border-color:rgba(108,99,255,.4)}
+  .flow-node.report{background:linear-gradient(135deg,#1e2235,#1e3526);border-color:rgba(67,197,158,.4)}
+  .fn-icon{font-size:20px;margin-bottom:4px}
+  .fn-title{font-size:12px;font-weight:600;color:#fff}
+  .fn-desc{font-size:10px;color:#aaa;margin-top:2px}
+  
+  .flow-arrow{display:flex;align-items:center;color:#4A90D9;font-size:20px;padding:0 6px}
+  .flow-arrow-down{display:flex;flex-direction:column;align-items:center;color:#4A90D9;font-size:16px;height:30px;justify-content:center}
+  
+  .flow-split{display:flex;align-items:flex-start;justify-content:center;gap:40px;padding:10px 0}
+  .flow-branch{display:flex;flex-direction:column;align-items:center;gap:0}
+  .flow-branch-title{font-size:11px;color:#666;margin-bottom:6px;background:#1a1d27;border-radius:99px;padding:2px 10px}
+  
+  /* ===== 组件库区 ===== */
+  .components-area{padding:40px 60px;background:#16181f}
+  .comp-grid{display:grid;grid-template-columns:repeat(auto-fill,220px);gap:20px;margin-bottom:24px}
+  .comp-card{background:#1e2028;border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,.05)}
+  .comp-name{font-size:11px;color:#666;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+  
+  /* 按钮组件 */
+  .ui-btn{height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;margin-bottom:8px;cursor:pointer}
+  .ui-btn.primary{background:linear-gradient(90deg,#4A90D9,#6C63FF);color:#fff}
+  .ui-btn.secondary{background:transparent;border:1.5px solid #4A90D9;color:#4A90D9}
+  .ui-btn.success{background:linear-gradient(90deg,#43C59E,#5dd9b5);color:#fff}
+  .ui-btn.danger{background:linear-gradient(90deg,#FF6B6B,#ff8e8e);color:#fff}
+  .ui-btn.sm{height:32px;font-size:11px;border-radius:8px}
+  
+  /* 标签组件 */
+  .ui-tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;margin:3px}
+  .ui-tag.blue{background:#4A90D910;color:#4A90D9;border:1px solid #4A90D930}
+  .ui-tag.green{background:#43C59E10;color:#43C59E;border:1px solid #43C59E30}
+  .ui-tag.purple{background:#6C63FF10;color:#6C63FF;border:1px solid #6C63FF30}
+  .ui-tag.red{background:#FF6B6B10;color:#FF6B6B;border:1px solid #FF6B6B30}
+  
+  /* 星级 */
+  .ui-stars{display:flex;gap:4px}
+  .ui-star{font-size:20px;filter:drop-shadow(0 0 4px #fbbf24)}
+  .ui-star.empty{filter:none;opacity:.3}
+  
+  /* 进度条 */
+  .ui-progress{height:8px;background:#f0f0f8;border-radius:99px;overflow:hidden;margin-bottom:10px;position:relative}
+  .ui-progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#4A90D9,#6C63FF)}
+  
+  /* 卡片 */
+  .ui-card{background:#fff;border-radius:12px;padding:14px;box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:8px}
+  
+  /* 图标 */
+  .ui-icon-row{display:flex;gap:12px;flex-wrap:wrap}
+  .ui-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+  .ui-icon.blue{background:#4A90D920;color:#4A90D9}
+  .ui-icon.purple{background:#6C63FF20;color:#6C63FF}
+  .ui-icon.green{background:#43C59E20;color:#43C59E}
+  .ui-icon.red{background:#FF6B6B20;color:#FF6B6B}
+  
+  /* 输入框 */
+  .ui-input{width:100%;height:42px;background:#f5f6fa;border-radius:10px;border:1.5px solid #e8eaed;padding:0 14px;font-size:13px;color:#333;display:flex;align-items:center;margin-bottom:8px}
+  .ui-input.focus{border-color:#4A90D9;background:#f0f6ff}
+  
+  @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+  
+  /* 响应式 */
+  @media(max-width:768px){
+    .page-header{padding:24px 20px}
+    .design-system,.components-area{padding:24px 20px}
+    .screens-area,.flow-area{padding:24px 16px}
+    .screens-grid{grid-template-columns:1fr;max-width:320px;margin:0 auto}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== 页面顶部 ===== -->
+<div class="page-header">
+  <h1>🧠 Focus Trainer — 儿童专注力训练系统 UI 设计图</h1>
+  <p>共 9 个核心页面 · 4 种训练游戏 · 家长端数据报告 · Flutter Mobile App</p>
+</div>
+
+<!-- ===== 设计规范 ===== -->
+<div class="design-system">
+  <div class="section-title">🎨 设计系统 · Design Tokens</div>
+  
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;flex-wrap:wrap">
+    <!-- 色彩系统 -->
+    <div>
+      <div style="font-size:13px;color:#888;margin-bottom:14px;font-weight:500">色彩系统 Color System</div>
+      <div class="token-row">
+        <div class="color-chip">
+          <div class="color-block" style="background:#4A90D9"></div>
+          <div class="color-label">Primary Blue</div>
+          <div class="color-hex">#4A90D9</div>
+        </div>
+        <div class="color-chip">
+          <div class="color-block" style="background:#6C63FF"></div>
+          <div class="color-label">Primary Purple</div>
+          <div class="color-hex">#6C63FF</div>
+        </div>
+        <div class="color-chip">
+          <div class="color-block" style="background:linear-gradient(135deg,#4A90D9,#6C63FF)"></div>
+          <div class="color-label">Brand Gradient</div>
+          <div class="color-hex">→ Gradient</div>
+        </div>
+        <div class="color-chip">
+          <div class="color-block" style="background:#43C59E"></div>
+          <div class="color-label">Success Green</div>
+          <div class="color-hex">#43C59E</div>
+        </div>
+        <div class="color-chip">
+          <div class="color-block" style="background:#FF6B6B"></div>
+          <div class="color-label">Error Red</div>
+          <div class="color-hex">#FF6B6B</div>
+        </div>
+        <div class="color-chip">
+          <div class="color-block" style="background:#FBBF24"></div>
+          <div class="color-label">Star Gold</div>
+          <div class="color-hex">#FBBF24</div>
+        </div>
+        <div class="color-chip">
+          <div class="color-block" style="background:#F0F2F8"></div>
+          <div class="color-label">BG Gray</div>
+          <div class="color-hex">#F0F2F8</div>
+        </div>
+        <div class="color-chip">
+          <div class="color-block" style="background:#333333"></div>
+          <div class="color-label">Text Dark</div>
+          <div class="color-hex">#333333</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 字体系统 -->
+    <div>
+      <div style="font-size:13px;color:#888;margin-bottom:14px;font-weight:500">字体系统 Typography</div>
+      <div class="type-sample">
+        <div class="ts-h1">游戏标题 H1 / 28px Bold</div>
+      </div>
+      <div class="type-sample">
+        <div class="ts-h2">页面标题 H2 / 22px SemiBold</div>
+      </div>
+      <div class="type-sample">
+        <div class="ts-h3">卡片标题 H3 / 18px Medium</div>
+      </div>
+      <div class="type-sample">
+        <div class="ts-body">正文内容 Body / 15px Regular — 用于游戏说明、报告描述等</div>
+      </div>
+      <div class="type-sample">
+        <div class="ts-caption">辅助文字 Caption / 12px Regular — 标签、单位、说明</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 间距系统 -->
+  <div style="margin-top:28px">
+    <div style="font-size:13px;color:#888;margin-bottom:14px;font-weight:500">间距系统 Spacing Scale (基础单位 4px)</div>
+    <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div style="width:4px;height:4px;background:#4A90D9;border-radius:2px"></div>
+        <span style="font-size:10px;color:#666">4px</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div style="width:8px;height:8px;background:#4A90D9;border-radius:2px"></div>
+        <span style="font-size:10px;color:#666">8px</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div style="width:12px;height:12px;background:#4A90D9;border-radius:3px"></div>
+        <span style="font-size:10px;color:#666">12px</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div style="width:16px;height:16px;background:#4A90D9;border-radius:3px"></div>
+        <span style="font-size:10px;color:#666">16px</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div style="width:24px;height:24px;background:#4A90D9;border-radius:4px"></div>
+        <span style="font-size:10px;color:#666">24px</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div style="width:32px;height:32px;background:#4A90D9;border-radius:6px"></div>
+        <span style="font-size:10px;color:#666">32px</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div style="width:48px;height:48px;background:#4A90D9;border-radius:8px"></div>
+        <span style="font-size:10px;color:#666">48px</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div style="width:64px;height:64px;background:#4A90D9;border-radius:10px"></div>
+        <span style="font-size:10px;color:#666">64px</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 组件库 ===== -->
+<div class="components-area">
+  <div class="section-title">🧱 核心组件库 Components</div>
+  <div class="comp-grid">
+    
+    <!-- 按钮 -->
+    <div class="comp-card">
+      <div class="comp-name">Buttons</div>
+      <div class="ui-btn primary">主操作 Primary</div>
+      <div class="ui-btn secondary">次要 Secondary</div>
+      <div class="ui-btn success">完成 Success</div>
+      <div class="ui-btn danger">错误 Danger</div>
+      <div style="display:flex;gap:8px">
+        <div class="ui-btn primary sm" style="flex:1">小号</div>
+        <div class="ui-btn secondary sm" style="flex:1;border-color:#43C59E;color:#43C59E">小号</div>
+      </div>
+    </div>
+    
+    <!-- 标签 -->
+    <div class="comp-card">
+      <div class="comp-name">Tags / Badges</div>
+      <div>
+        <span class="ui-tag blue">初级</span>
+        <span class="ui-tag blue">视觉追踪</span>
+      </div>
+      <div>
+        <span class="ui-tag green">进行中</span>
+        <span class="ui-tag green">3×3</span>
+      </div>
+      <div>
+        <span class="ui-tag purple">高级</span>
+        <span class="ui-tag purple">记忆训练</span>
+      </div>
+      <div>
+        <span class="ui-tag red">错误</span>
+        <span class="ui-tag red">挑战</span>
+      </div>
+    </div>
+    
+    <!-- 星级评分 -->
+    <div class="comp-card">
+      <div class="comp-name">Star Rating</div>
+      <div style="margin-bottom:8px">
+        <div style="font-size:10px;color:#888;margin-bottom:4px">3星 — 完美</div>
+        <div class="ui-stars">
+          <span class="ui-star">⭐</span><span class="ui-star">⭐</span><span class="ui-star">⭐</span>
+        </div>
+      </div>
+      <div style="margin-bottom:8px">
+        <div style="font-size:10px;color:#888;margin-bottom:4px">2星 — 良好</div>
+        <div class="ui-stars">
+          <span class="ui-star">⭐</span><span class="ui-star">⭐</span><span class="ui-star empty">⭐</span>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:#888;margin-bottom:4px">1星 — 继续努力</div>
+        <div class="ui-stars">
+          <span class="ui-star">⭐</span><span class="ui-star empty">⭐</span><span class="ui-star empty">⭐</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 进度条 -->
+    <div class="comp-card" style="background:#fff">
+      <div class="comp-name" style="color:#999">Progress Bars</div>
+      <div style="font-size:10px;color:#888;margin-bottom:4px">专注力 82%</div>
+      <div class="ui-progress"><div class="ui-progress-fill" style="width:82%;background:linear-gradient(90deg,#4A90D9,#6C63FF)"></div></div>
+      <div style="font-size:10px;color:#888;margin-bottom:4px">记忆力 67%</div>
+      <div class="ui-progress"><div class="ui-progress-fill" style="width:67%;background:linear-gradient(90deg,#6C63FF,#a78bfa)"></div></div>
+      <div style="font-size:10px;color:#888;margin-bottom:4px">视觉追踪 90%</div>
+      <div class="ui-progress"><div class="ui-progress-fill" style="width:90%;background:linear-gradient(90deg,#43C59E,#5dd9b5)"></div></div>
+      <div style="font-size:10px;color:#888;margin-bottom:4px">反应速度 55%</div>
+      <div class="ui-progress"><div class="ui-progress-fill" style="width:55%;background:linear-gradient(90deg,#FBBF24,#f59e0b)"></div></div>
+    </div>
+    
+    <!-- 图标 -->
+    <div class="comp-card">
+      <div class="comp-name">Icon Buttons</div>
+      <div class="ui-icon-row">
+        <div class="ui-icon blue">🎯</div>
+        <div class="ui-icon purple">👁</div>
+        <div class="ui-icon green">🎵</div>
+        <div class="ui-icon red">🃏</div>
+      </div>
+      <div class="ui-icon-row" style="margin-top:8px">
+        <div class="ui-icon blue">📊</div>
+        <div class="ui-icon purple">🏆</div>
+        <div class="ui-icon green">⭐</div>
+        <div class="ui-icon red">🔔</div>
+      </div>
+    </div>
+    
+    <!-- 输入框 -->
+    <div class="comp-card" style="background:#fff">
+      <div class="comp-name" style="color:#999">Form Inputs</div>
+      <div class="ui-input" style="color:#333;border-color:#e8eaed">账号 / 手机号</div>
+      <div class="ui-input focus" style="color:#333">密码</div>
+      <div style="display:flex;gap:6px">
+        <div class="ui-input" style="flex:1;font-size:11px;color:#aaa">请输入...</div>
+        <div class="ui-btn primary sm" style="width:60px;flex-shrink:0">确认</div>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+<!-- ===== 导航流程图 ===== -->
+<div class="flow-area">
+  <div class="flow-container">
+    <div class="flow-title">🗺️ 页面导航流程图 Navigation Flow</div>
+    <div style="overflow-x:auto;padding-bottom:10px">
+      <div style="min-width:900px">
+        
+        <!-- 第一行：启动 → 登录 → 首页 -->
+        <div class="flow-row" style="margin-bottom:0">
+          <div class="flow-node start" style="min-width:80px">
+            <div class="fn-icon">📱</div>
+            <div class="fn-title">App 启动</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node start">
+            <div class="fn-icon">🔐</div>
+            <div class="fn-title">登录页</div>
+            <div class="fn-desc">账号密码 / 注册</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node start">
+            <div class="fn-icon">🏠</div>
+            <div class="fn-title">首页</div>
+            <div class="fn-desc">4个训练模块</div>
+          </div>
+        </div>
+        
+        <!-- 向下箭头 -->
+        <div style="display:flex;justify-content:center;padding-left:280px">
+          <div class="flow-arrow-down">↓</div>
+        </div>
+        
+        <!-- 第二行：首页分支 -->
+        <div style="display:flex;gap:12px;justify-content:center;align-items:flex-start;padding:0 20px">
+          
+          <!-- 分支1: 游戏选择 -->
+          <div style="display:flex;flex-direction:column;align-items:center;gap:0;min-width:120px">
+            <div class="flow-node game" style="width:120px">
+              <div class="fn-icon">🎮</div>
+              <div class="fn-title">游戏选择</div>
+              <div class="fn-desc">游戏+难度</div>
+            </div>
+            <div class="flow-arrow-down">↓</div>
+            <div style="display:flex;gap:8px">
+              <div class="flow-node game" style="min-width:70px;padding:8px 10px">
+                <div class="fn-icon" style="font-size:14px">🔢</div>
+                <div class="fn-title" style="font-size:10px">舒尔特</div>
+              </div>
+              <div class="flow-node game" style="min-width:70px;padding:8px 10px">
+                <div class="fn-icon" style="font-size:14px">💡</div>
+                <div class="fn-title" style="font-size:10px">数字闪</div>
+              </div>
+              <div class="flow-node game" style="min-width:70px;padding:8px 10px">
+                <div class="fn-icon" style="font-size:14px">🃏</div>
+                <div class="fn-title" style="font-size:10px">卡片配</div>
+              </div>
+              <div class="flow-node game" style="min-width:70px;padding:8px 10px">
+                <div class="fn-icon" style="font-size:14px">🎵</div>
+                <div class="fn-title" style="font-size:10px">声音列</div>
+              </div>
+            </div>
+            <div class="flow-arrow-down">↓</div>
+            <div class="flow-node" style="background:linear-gradient(135deg,#FBBF2422,#1e2235);border-color:#FBBF2460;width:310px">
+              <div class="fn-icon">🏆</div>
+              <div class="fn-title">游戏结果页</div>
+              <div class="fn-desc">星级评价 + 成绩明细 + 再挑战/返回首页</div>
+            </div>
+          </div>
+          
+          <!-- 分支2: 报告 -->
+          <div style="display:flex;flex-direction:column;align-items:center;gap:0;min-width:140px;margin-left:20px">
+            <div class="flow-node report" style="width:140px">
+              <div class="fn-icon">📊</div>
+              <div class="fn-title">训练报告</div>
+              <div class="fn-desc">总览/趋势/记录</div>
+            </div>
+            <div class="flow-arrow-down">↓</div>
+            <div style="display:flex;gap:8px">
+              <div class="flow-node report" style="min-width:60px;padding:8px 8px">
+                <div class="fn-icon" style="font-size:13px">📋</div>
+                <div class="fn-title" style="font-size:10px">总览</div>
+              </div>
+              <div class="flow-node report" style="min-width:60px;padding:8px 8px">
+                <div class="fn-icon" style="font-size:13px">📈</div>
+                <div class="fn-title" style="font-size:10px">趋势</div>
+              </div>
+              <div class="flow-node report" style="min-width:60px;padding:8px 8px">
+                <div class="fn-icon" style="font-size:13px">📝</div>
+                <div class="fn-title" style="font-size:10px">记录</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 分支3: 我的 -->
+          <div style="display:flex;flex-direction:column;align-items:center;gap:0;min-width:100px;margin-left:20px">
+            <div class="flow-node" style="width:100px;border-color:rgba(255,255,255,.15)">
+              <div class="fn-icon">👤</div>
+              <div class="fn-title">个人中心</div>
+              <div class="fn-desc">账号/星星</div>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 所有页面 UI ===== -->
+<div class="screens-area">
+  <div class="section-title" style="color:#4A90D9;border-left-color:#4A90D9;padding-left:12px;font-size:20px;font-weight:700;margin-bottom:32px">📱 页面原型图 Screen Designs</div>
+  <div class="screens-grid">
+    
+    <!-- ===== Screen 1: 登录页 ===== -->
+    <div>
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="login-screen">
+            <div class="status-bar" style="color:rgba(255,255,255,.8);position:absolute;top:24px;left:0;right:0">
+              <span>9:41</span><span>📶 🔋</span>
+            </div>
+            <div class="login-logo">🧠</div>
+            <div class="login-title">专注力训练</div>
+            <div class="login-subtitle">FocusKids · 为孩子打造的注意力训练助手</div>
+            <div class="login-card">
+              <div class="input-label">账号</div>
+              <div class="input-box">请输入手机号或用户名</div>
+              <div class="input-label">密码</div>
+              <div class="input-box focused" style="color:#333;border-color:#4A90D9">••••••••</div>
+              <div class="btn-login">登 录</div>
+              <div class="login-footer">还没有账号？<span>立即注册</span> · <span>忘记密码</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-label">登录页</div>
+      <div class="phone-sub">LoginScreen</div>
+    </div>
+    
+    <!-- ===== Screen 2: 首页 ===== -->
+    <div>
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="home-screen">
+            <div class="home-header">
+              <div class="home-user-row">
+                <div class="home-avatar">🧒</div>
+                <div>
+                  <div class="home-username">你好，小明</div>
+                  <div class="home-date">2026年3月27日 星期五</div>
+                </div>
+              </div>
+              <div class="home-stats">
+                <div class="home-stat">
+                  <div class="home-stat-icon">⭐</div>
+                  <div class="home-stat-num">128</div>
+                  <div class="home-stat-label">累计星星</div>
+                </div>
+                <div class="home-stat">
+                  <div class="home-stat-icon">🔥</div>
+                  <div class="home-stat-num">7</div>
+                  <div class="home-stat-label">连续天数</div>
+                </div>
+                <div class="home-stat">
+                  <div class="home-stat-icon">🎯</div>
+                  <div class="home-stat-num">24</div>
+                  <div class="home-stat-label">本周次数</div>
+                </div>
+              </div>
+            </div>
+            <div class="home-content">
+              <div class="home-section-title">训练模块</div>
+              <div class="home-cards">
+                <div class="training-card tc1">
+                  <div class="tc-icon">⏱️</div>
+                  <div class="tc-name">专注时长</div>
+                  <div class="tc-desc">定时专注，培养习惯</div>
+                  <div class="tc-tag">5个难度</div>
+                </div>
+                <div class="training-card tc2">
+                  <div class="tc-icon">👁</div>
+                  <div class="tc-name">视觉追踪</div>
+                  <div class="tc-desc">舒尔特方格+数字闪现</div>
+                  <div class="tc-tag">3个难度</div>
+                </div>
+                <div class="training-card tc3">
+                  <div class="tc-icon">👂</div>
+                  <div class="tc-name">听觉专注</div>
+                  <div class="tc-desc">声音序列记忆训练</div>
+                  <div class="tc-tag">3个难度</div>
+                </div>
+                <div class="training-card tc4">
+                  <div class="tc-icon">🧩</div>
+                  <div class="tc-name">记忆训练</div>
+                  <div class="tc-desc">卡片配对记忆游戏</div>
+                  <div class="tc-tag">3个难度</div>
+                </div>
+              </div>
+              <div class="quick-card">
+                <div>
+                  <div class="qc-text">⚡ 快速开始</div>
+                  <div class="qc-sub">舒尔特方格 · 初级</div>
+                </div>
+                <div class="qc-btn">开始</div>
+              </div>
+            </div>
+            <div class="home-bottom-nav">
+              <div class="nav-item">
+                <div class="nav-icon active">🏠</div>
+                <div class="nav-text active">首页</div>
+              </div>
+              <div class="nav-item">
+                <div class="nav-icon">📊</div>
+                <div class="nav-text">报告</div>
+              </div>
+              <div class="nav-item">
+                <div class="nav-icon">👤</div>
+                <div class="nav-text">我的</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-label">首页</div>
+      <div class="phone-sub">HomeScreen</div>
+    </div>
+    
+    <!-- ===== Screen 3: 游戏选择 ===== -->
+    <div>
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="sel-screen">
+            <div class="sel-appbar">
+              <div class="sel-back">←</div>
+              <div class="sel-title">👁 视觉追踪训练</div>
+            </div>
+            <div class="sel-content">
+              <div class="sel-category">
+                <div class="sel-cat-header">
+                  <div class="sel-cat-icon">🔢</div>
+                  <div>
+                    <div class="sel-cat-name">舒尔特方格</div>
+                    <div class="sel-cat-desc">按顺序点击数字，训练视觉搜索</div>
+                  </div>
+                </div>
+                <div class="sel-game">
+                  <div>
+                    <div class="sel-game-name">3×3 方格</div>
+                    <div class="sel-game-desc">9个数字 · 约15秒</div>
+                  </div>
+                  <div class="sel-levels">
+                    <div class="sel-level-btn easy">初级</div>
+                  </div>
+                </div>
+                <div class="sel-game">
+                  <div>
+                    <div class="sel-game-name">4×4 方格</div>
+                    <div class="sel-game-desc">16个数字 · 约40秒</div>
+                  </div>
+                  <div class="sel-levels">
+                    <div class="sel-level-btn mid">中级</div>
+                  </div>
+                </div>
+                <div class="sel-game">
+                  <div>
+                    <div class="sel-game-name">5×5 方格</div>
+                    <div class="sel-game-desc">25个数字 · 约75秒</div>
+                  </div>
+                  <div class="sel-levels">
+                    <div class="sel-level-btn hard">高级</div>
+                  </div>
+                </div>
+              </div>
+              <div class="sel-category">
+                <div class="sel-cat-header">
+                  <div class="sel-cat-icon">💡</div>
+                  <div>
+                    <div class="sel-cat-name">数字闪现</div>
+                    <div class="sel-cat-desc">快速记忆闪现数字，训练瞬间记忆</div>
+                  </div>
+                </div>
+                <div class="sel-game">
+                  <div>
+                    <div class="sel-game-name">3位数字 · 2s</div>
+                    <div class="sel-game-desc">5轮闪现</div>
+                  </div>
+                  <div class="sel-levels">
+                    <div class="sel-level-btn easy">初级</div>
+                  </div>
+                </div>
+                <div class="sel-game">
+                  <div>
+                    <div class="sel-game-name">4位数字 · 1.5s</div>
+                    <div class="sel-game-desc">7轮闪现</div>
+                  </div>
+                  <div class="sel-levels">
+                    <div class="sel-level-btn mid">中级</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-label">游戏选择</div>
+      <div class="phone-sub">GameSelectionScreen</div>
+    </div>
+    
+    <!-- ===== Screen 4: 舒尔特方格 ===== -->
+    <div>
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="schulte-screen">
+            <div class="schulte-header">
+              <div class="schulte-hrow">
+                <span style="color:#fff;font-size:16px">←</span>
+                <div class="schulte-htitle">舒尔特方格</div>
+                <div class="schulte-badge">中级 4×4</div>
+              </div>
+              <div class="schulte-stats">
+                <div class="schulte-stat">
+                  <div class="schulte-stat-val">00:23.5</div>
+                  <div class="schulte-stat-label">⏱ 用时</div>
+                </div>
+                <div class="schulte-stat">
+                  <div class="schulte-stat-val">7/16</div>
+                  <div class="schulte-stat-label">✅ 进度</div>
+                </div>
+                <div class="schulte-stat">
+                  <div class="schulte-stat-val" style="color:#FF6B6B">2</div>
+                  <div class="schulte-stat-label">❌ 错误</div>
+                </div>
+              </div>
+            </div>
+            <div class="schulte-body">
+              <div class="schulte-progress">下一个数字：<strong style="color:#4A90D9;font-size:16px">8</strong></div>
+              <div class="schulte-grid" style="grid-template-columns:repeat(4,1fr);width:256px">
+                <div class="schulte-cell correct" style="width:58px;height:58px">1</div>
+                <div class="schulte-cell correct" style="width:58px;height:58px">6</div>
+                <div class="schulte-cell" style="width:58px;height:58px">11</div>
+                <div class="schulte-cell" style="width:58px;height:58px">4</div>
+                <div class="schulte-cell correct" style="width:58px;height:58px">2</div>
+                <div class="schulte-cell" style="width:58px;height:58px">15</div>
+                <div class="schulte-cell correct" style="width:58px;height:58px">7</div>
+                <div class="schulte-cell" style="width:58px;height:58px">9</div>
+                <div class="schulte-cell correct" style="width:58px;height:58px">3</div>
+                <div class="schulte-cell current" style="width:58px;height:58px;font-size:20px">8</div>
+                <div class="schulte-cell" style="width:58px;height:58px">13</div>
+                <div class="schulte-cell" style="width:58px;height:58px">16</div>
+                <div class="schulte-cell correct" style="width:58px;height:58px">5</div>
+                <div class="schulte-cell wrong" style="width:58px;height:58px">10</div>
+                <div class="schulte-cell" style="width:58px;height:58px">14</div>
+                <div class="schulte-cell" style="width:58px;height:58px">12</div>
+              </div>
+              <div style="font-size:11px;color:#aaa;text-align:center">找到 <strong style="color:#4A90D9">8</strong> 并点击！</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-label">舒尔特方格</div>
+      <div class="phone-sub">SchulteGridScreen</div>
+    </div>
+    
+    <!-- ===== Screen 5: 数字闪现 ===== -->
+    <div>
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="flash-screen">
+            <div class="flash-top">
+              <div class="flash-back">←</div>
+              <div style="text-align:center">
+                <div style="font-size:13px;color:#aaa">数字闪现</div>
+                <span class="flash-round">第 3 / 7 轮</span>
+              </div>
+              <div style="color:#FBBF24;font-size:13px">⭐ 20分</div>
+            </div>
+            <div class="flash-main">
+              <div class="flash-prompt">记住这个数字！</div>
+              <div class="flash-number-display">
+                <div class="flash-number">7 4 2 8</div>
+              </div>
+              <div style="font-size:11px;color:#555;text-align:center;margin-top:8px">1.5 秒后消失</div>
+            </div>
+            <div class="flash-keyboard">
+              <div class="flash-input-display">_ _ _ _</div>
+              <div class="flash-kb-row">
+                <div class="flash-kb-btn">7</div>
+                <div class="flash-kb-btn">8</div>
+                <div class="flash-kb-btn">9</div>
+              </div>
+              <div class="flash-kb-row">
+                <div class="flash-kb-btn">4</div>
+                <div class="flash-kb-btn">5</div>
+                <div class="flash-kb-btn">6</div>
+              </div>
+              <div class="flash-kb-row">
+                <div class="flash-kb-btn">1</div>
+                <div class="flash-kb-btn">2</div>
+                <div class="flash-kb-btn">3</div>
+              </div>
+              <div class="flash-kb-row">
+                <div class="flash-kb-btn special">⌫</div>
+                <div class="flash-kb-btn">0</div>
+                <div class="flash-kb-btn special">✓</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-label">数字闪现</div>
+      <div class="phone-sub">FlashNumberScreen</div>
+    </div>
+    
+    <!-- ===== Screen 6: 卡片配对 ===== -->
+    <div>
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="card-screen">
+            <div class="card-header">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="color:#fff;font-size:16px">←</span>
+                <span style="font-size:15px;font-weight:700;color:#fff">卡片配对</span>
+                <span class="schulte-badge">8对 · 中级</span>
+              </div>
+              <div class="card-stats">
+                <div class="card-stat">
+                  <div class="schulte-stat-val">28</div>
+                  <div class="schulte-stat-label">👣 步数</div>
+                </div>
+                <div class="card-stat">
+                  <div class="schulte-stat-val">5/8</div>
+                  <div class="schulte-stat-label">✅ 已配对</div>
+                </div>
+                <div class="card-stat">
+                  <div class="schulte-stat-val">01:12</div>
+                  <div class="schulte-stat-label">⏱ 用时</div>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="card-tile matched">🐶</div>
+              <div class="card-tile matched">🐶</div>
+              <div class="card-tile matched">🐱</div>
+              <div class="card-tile matched">🐱</div>
+              <div class="card-tile front">🦊</div>
+              <div class="card-tile back"></div>
+              <div class="card-tile matched">🐻</div>
+              <div class="card-tile matched">🐻</div>
+              <div class="card-tile back"></div>
+              <div class="card-tile back"></div>
+              <div class="card-tile matched">🦁</div>
+              <div class="card-tile matched">🦁</div>
+              <div class="card-tile back"></div>
+              <div class="card-tile back"></div>
+              <div class="card-tile back"></div>
+              <div class="card-tile back"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-label">卡片配对</div>
+      <div class="phone-sub">CardMatchScreen</div>
+    </div>
+    
+    <!-- ===== Screen 7: 声音序列 ===== -->
+    <div>
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="sound-screen">
+            <div class="sound-header">
+              <div>
+                <div class="sound-title">🎵 声音序列</div>
+                <div style="font-size:11px;color:#aaa">第 2 / 5 轮</div>
+              </div>
+              <div class="sound-phase">👆 你的回放</div>
+            </div>
+            <div style="font-size:12px;color:#aaa;margin-bottom:8px;text-align:center">记忆的序列（5个）</div>
+            <div class="sound-sequence">
+              <div class="sound-item selected">🐶</div>
+              <div class="sound-item selected">🐱</div>
+              <div class="sound-item selected">🦊</div>
+              <div class="sound-item" style="border:2px dashed rgba(255,255,255,.2)">❓</div>
+              <div class="sound-item" style="border:2px dashed rgba(255,255,255,.2)">❓</div>
+            </div>
+            <div class="sound-label">选择第 4 个声音：</div>
+            <div class="sound-grid">
+              <div class="sound-btn">
+                <div class="sound-btn-emoji">🐶</div>
+                <div class="sound-btn-label">汪汪</div>
+              </div>
+              <div class="sound-btn active">
+                <div class="sound-btn-emoji">🐱</div>
+                <div class="sound-btn-label">喵喵</div>
+              </div>
+              <div class="sound-btn">
+                <div class="sound-btn-emoji">🦊</div>
+                <div class="sound-btn-label">嗷嗷</div>
+              </div>
+              <div class="sound-btn">
+                <div class="sound-btn-emoji">🐻</div>
+                <div class="sound-btn-label">吼吼</div>
+              </div>
+              <div class="sound-btn">
+                <div class="sound-btn-emoji">🐸</div>
+                <div class="sound-btn-label">呱呱</div>
+              </div>
+              <div class="sound-btn">
+                <div class="sound-btn-emoji">🦅</div>
+                <div class="sound-btn-label">啾啾</div>
+              </div>
+              <div class="sound-btn">
+                <div class="sound-btn-emoji">🐘</div>
+                <div class="sound-btn-label">昂昂</div>
+              </div>
+              <div class="sound-btn">
+                <div class="sound-btn-emoji">🦆</div>
+                <div class="sound-btn-label">嘎嘎</div>
+              </div>
+            </div>
+            <div class="sound-progress">
+              <div class="sound-dot filled"></div>
+              <div class="sound-dot filled"></div>
+              <div class="sound-dot"></div>
+              <div class="sound-dot"></div>
+              <div class="sound-dot"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-label">声音序列</div>
+      <div class="phone-sub">SoundSequenceScreen</div>
+    </div>
+    
+    <!-- ===== Screen 8: 游戏结果 ===== -->
+    <div>
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="result-screen">
+            <div style="width:100%;display:flex;justify-content:flex-end">
+              <span style="color:#aaa;font-size:20px">✕</span>
+            </div>
+            <div class="result-icon">🎉</div>
+            <div class="result-title">太棒了！</div>
+            <div class="result-sub">舒尔特方格 · 中级 4×4</div>
+            <div class="result-stars">
+              <span class="result-star">⭐</span>
+              <span class="result-star">⭐</span>
+              <span class="result-star" style="filter:none;opacity:.3">⭐</span>
+            </div>
+            <div class="result-card">
+              <div class="result-row">
+                <span class="result-key">⏱ 完成用时</span>
+                <span class="result-val" style="color:#4A90D9">38.2 秒</span>
+              </div>
+              <div class="result-row">
+                <span class="result-key">❌ 错误次数</span>
+                <span class="result-val" style="color:#FF6B6B">2 次</span>
+              </div>
+              <div class="result-row">
+                <span class="result-key">✅ 正确率</span>
+                <span class="result-val" style="color:#43C59E">87.5%</span>
+              </div>
+              <div class="result-row">
+                <span class="result-key">⭐ 获得星星</span>
+                <span class="result-val" style="color:#FBBF24">+18 颗</span>
+              </div>
+            </div>
+            <div class="result-btns">
+              <div class="result-btn secondary">🔄 再挑战</div>
+              <div class="result-btn primary">🏠 返回首页</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-label">游戏结果</div>
+      <div class="phone-sub">ResultScreen</div>
+    </div>
+    
+    <!-- ===== Screen 9: 家长报告 ===== -->
+    <div>
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="report-screen">
+            <div class="report-appbar">
+              <div class="report-title-row">
+                <div class="report-title">📊 训练报告</div>
+                <div class="report-refresh">↻</div>
+              </div>
+              <div class="report-tabs">
+                <div class="report-tab active">总览</div>
+                <div class="report-tab">趋势</div>
+                <div class="report-tab">记录</div>
+              </div>
+            </div>
+            <div class="report-content">
+              <div class="report-summary">
+                <div class="report-sum-card">
+                  <div><span class="report-sum-num">5</span><span class="report-sum-unit">次</span></div>
+                  <div class="report-sum-label">今日训练</div>
+                </div>
+                <div class="report-sum-card">
+                  <div><span class="report-sum-num">28</span><span class="report-sum-unit">次</span></div>
+                  <div class="report-sum-label">本周训练</div>
+                </div>
+                <div class="report-sum-card">
+                  <div><span class="report-sum-num">128</span><span class="report-sum-unit">颗</span></div>
+                  <div class="report-sum-label">累计星星</div>
+                </div>
+                <div class="report-sum-card">
+                  <div><span class="report-sum-num">82</span><span class="report-sum-unit">分</span></div>
+                  <div class="report-sum-label">综合评分</div>
+                </div>
+              </div>
+              <div class="report-section-title">🎯 能力分析</div>
+              <div class="report-ability-bar">
+                <div class="report-ab-row">
+                  <div class="report-ab-label">专注力</div>
+                  <div class="report-ab-track"><div class="report-ab-fill" style="width:82%;background:linear-gradient(90deg,#4A90D9,#6C63FF)"></div></div>
+                  <div class="report-ab-val" style="color:#4A90D9">82</div>
+                </div>
+                <div class="report-ab-row">
+                  <div class="report-ab-label">视觉追踪</div>
+                  <div class="report-ab-track"><div class="report-ab-fill" style="width:90%;background:linear-gradient(90deg,#43C59E,#5dd9b5)"></div></div>
+                  <div class="report-ab-val" style="color:#43C59E">90</div>
+                </div>
+                <div class="report-ab-row">
+                  <div class="report-ab-label">记忆能力</div>
+                  <div class="report-ab-track"><div class="report-ab-fill" style="width:67%;background:linear-gradient(90deg,#6C63FF,#a78bfa)"></div></div>
+                  <div class="report-ab-val" style="color:#6C63FF">67</div>
+                </div>
+                <div class="report-ab-row">
+                  <div class="report-ab-label">听觉专注</div>
+                  <div class="report-ab-track"><div class="report-ab-fill" style="width:75%;background:linear-gradient(90deg,#FBBF24,#f59e0b)"></div></div>
+                  <div class="report-ab-val" style="color:#FBBF24">75</div>
+                </div>
+              </div>
+              <div class="report-section-title">💡 训练洞察</div>
+              <div style="background:#fff;border-radius:12px;padding:12px;font-size:12px;color:#666;line-height:1.6;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+                小明的 <strong style="color:#43C59E">视觉追踪</strong> 能力优秀，达到同龄平均水平的 <strong style="color:#4A90D9">120%</strong>！建议加强 <strong style="color:#6C63FF">记忆能力</strong> 的训练频次，每天坚持练习。
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-label">家长数据报告</div>
+      <div class="phone-sub">ParentReportScreen</div>
+    </div>
+    
+  </div>
+</div>
+
+<!-- ===== 底部 ===== -->
+<div style="background:#16181f;padding:32px;text-align:center;border-top:1px solid rgba(255,255,255,.05)">
+  <div style="font-size:14px;color:#666">Focus Trainer · 儿童专注力训练系统 · UI 设计图</div>
+  <div style="font-size:12px;color:#444;margin-top:6px">技术栈: Flutter 3.0+ · Provider · charts_flutter · audioplayers</div>
+  <div style="font-size:12px;color:#444;margin-top:4px">后端: Java 1.8 · Spring Boot 2.7.18 · MyBatis-Plus · Redis · JWT</div>
+</div>
+
+</body>
+</html>

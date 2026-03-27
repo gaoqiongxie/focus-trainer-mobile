@@ -331,24 +331,41 @@ class _SchulteGridScreenState extends State<SchulteGridScreen
   Widget _buildGameScreen() {
     final total = _gridSize * _gridSize;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF0F4FF),
-      appBar: AppBar(
-        title: const Text('舒尔特方格', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: const Color(0xFF50C878),
-        foregroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () {
-              _stopwatch.stop();
-              _displayTimer?.cancel();
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      ),
+    return WillPopScope(
+      onWillPop: () async {
+        // 关闭时中断训练记录
+        _stopwatch.stop();
+        _displayTimer?.cancel();
+        if (_trainingRecord != null) {
+          context.read<TrainingProvider>().interruptTraining(
+            _trainingRecord!['recordId'],
+          );
+        }
+        return true;
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF0F4FF),
+        appBar: AppBar(
+          title: const Text('舒尔特方格', style: TextStyle(fontWeight: FontWeight.bold)),
+          backgroundColor: const Color(0xFF50C878),
+          foregroundColor: Colors.white,
+          elevation: 0,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () {
+                _stopwatch.stop();
+                _displayTimer?.cancel();
+                if (_trainingRecord != null) {
+                  context.read<TrainingProvider>().interruptTraining(
+                    _trainingRecord!['recordId'],
+                  );
+                }
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
       body: Column(
         children: [
           // 状态栏
@@ -429,6 +446,7 @@ class _SchulteGridScreenState extends State<SchulteGridScreen
           ),
           const Spacer(),
         ],
+      ),
       ),
     );
   }

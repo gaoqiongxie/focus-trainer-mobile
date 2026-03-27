@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import '../utils/http_util.dart';
 
 class AppConfig {
   static const String appName = '专注力训练';
   
-  // 后端API地址
-  static const String baseUrl = 'http://10.0.2.2:8080/api/v1';
+  // 后端API地址 — 统一使用 HttpUtil 中的 baseUrl
+  static String get baseUrl => HttpUtil._baseUrl;
   
   // 训练类型
   static const Map<int, String> trainingTypes = {

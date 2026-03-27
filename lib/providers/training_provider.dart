@@ -108,4 +108,17 @@ class TrainingProvider extends ChangeNotifier {
       // 静默处理
     }
   }
+
+  /// 中断训练
+  Future<void> interruptTraining(int recordId) async {
+    try {
+      await HttpUtil.post('/training/interrupt', data: {
+        'recordId': recordId,
+      });
+      _currentTraining = null;
+      notifyListeners();
+    } catch (e) {
+      // 静默处理
+    }
+  }
 }

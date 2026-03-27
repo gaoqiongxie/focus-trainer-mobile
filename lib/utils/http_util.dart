@@ -6,6 +6,9 @@ class HttpUtil {
   static const String _tokenKey = 'auth_token';
   static const String _baseUrl = 'http://10.0.2.2:8080/api/v1';
 
+  /// 401 未授权回调，用于自动登出
+  static void Function()? onUnauthorized;
+
   static void init() {
     _dio = Dio(BaseOptions(
       baseUrl: _baseUrl,
@@ -24,7 +27,12 @@ class HttpUtil {
         }
         handler.next(options);
       },
-      onError: (error, handler) {
+      onError: (error, handler) async {
+        // 401 未授权：清除token并触发登出
+        if (error.response?.statusCode == 401) {
+          await removeToken();
+          onUnauthorized?.call();
+        }
         handler.next(error);
       },
     ));

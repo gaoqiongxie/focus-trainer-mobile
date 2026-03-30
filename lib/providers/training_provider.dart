@@ -1,53 +1,60 @@
 import 'package:flutter/material.dart';
+import '../models/training_model.dart';
 import '../utils/http_util.dart';
 
 class TrainingProvider extends ChangeNotifier {
-  List<Map<String, dynamic>> _configs = [];
-  List<Map<String, dynamic>> _records = [];
+  List<TrainingConfigModel> _configs = [];
+  List<TrainingRecordModel> _records = [];
   Map<String, dynamic>? _statistics;
-  Map<String, dynamic>? _currentTraining;
+  TrainingRecordModel? _currentTraining;
   bool _isLoading = false;
 
-  List<Map<String, dynamic>> get configs => _configs;
-  List<Map<String, dynamic>> get records => _records;
+  List<TrainingConfigModel> get configs => _configs;
+  List<TrainingRecordModel> get records => _records;
   Map<String, dynamic>? get statistics => _statistics;
-  Map<String, dynamic>? get currentTraining => _currentTraining;
+  TrainingRecordModel? get currentTraining => _currentTraining;
   bool get isLoading => _isLoading;
 
   /// 获取训练配置列表
   Future<void> loadConfigs({int? trainingType}) async {
     _isLoading = true;
     notifyListeners();
-    
+
     try {
       final response = await HttpUtil.get('/training/config', params: {
         if (trainingType != null) 'trainingType': trainingType,
       });
-      
+
       if (response.statusCode == 200 && response.data['code'] == 200) {
-        _configs = List<Map<String, dynamic>>.from(response.data['data']);
+        final list = response.data['data'] as List<dynamic>? ?? [];
+        _configs = list
+            .map((e) => TrainingConfigModel.fromJson(e as Map<String, dynamic>))
+            .toList();
       }
     } catch (e) {
       // 静默处理
     }
-    
+
     _isLoading = false;
     notifyListeners();
   }
 
   /// 开始训练
-  Future<Map<String, dynamic>?> startTraining(int trainingType, int level, int duration) async {
+  Future<TrainingRecordModel?> startTraining(int trainingType, int level, int duration) async {
     try {
       final response = await HttpUtil.post('/training/start', data: {
         'trainingType': trainingType,
         'level': level,
         'duration': duration,
       });
-      
+
       if (response.statusCode == 200 && response.data['code'] == 200) {
-        _currentTraining = response.data['data'];
-        notifyListeners();
-        return _currentTraining;
+        final data = response.data['data'];
+        if (data != null) {
+          _currentTraining = TrainingRecordModel.fromJson(data as Map<String, dynamic>);
+          notifyListeners();
+          return _currentTraining;
+        }
       }
     } catch (e) {
       // 静默处理
@@ -65,7 +72,7 @@ class TrainingProvider extends ChangeNotifier {
         'accuracy': accuracy,
         'score': score,
       });
-      
+
       if (response.statusCode == 200 && response.data['code'] == 200) {
         _currentTraining = null;
         notifyListeners();
@@ -81,9 +88,9 @@ class TrainingProvider extends ChangeNotifier {
   Future<void> loadStatistics(String period) async {
     try {
       final response = await HttpUtil.get('/training/statistics', params: {'period': period});
-      
+
       if (response.statusCode == 200 && response.data['code'] == 200) {
-        _statistics = response.data['data'];
+        _statistics = response.data['data'] as Map<String, dynamic>?;
         notifyListeners();
       }
     } catch (e) {
@@ -99,9 +106,12 @@ class TrainingProvider extends ChangeNotifier {
         'page': page,
         'size': size,
       });
-      
+
       if (response.statusCode == 200 && response.data['code'] == 200) {
-        _records = List<Map<String, dynamic>>.from(response.data['data']);
+        final list = response.data['data'] as List<dynamic>? ?? [];
+        _records = list
+            .map((e) => TrainingRecordModel.fromJson(e as Map<String, dynamic>))
+            .toList();
         notifyListeners();
       }
     } catch (e) {

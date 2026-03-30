@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/training_provider.dart';
 import '../providers/reward_provider.dart';
+import '../providers/daily_task_provider.dart';
+import '../models/daily_task_model.dart';
 import 'training_screen.dart';
 import 'profile_screen.dart';
 import 'game_selection_screen.dart';
@@ -31,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
       context.read<RewardProvider>().loadStarCount(),
       context.read<RewardProvider>().loadStreak(),
       context.read<TrainingProvider>().loadStatistics('week'),
+      context.read<DailyTaskProvider>().loadDailyTasks(),
     ]);
   }
 
@@ -69,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               const SizedBox(width: 12),
                               Text(
-                                '你好，${user.userInfo?['nickname'] ?? '小朋友'}',
+                                '你好，${user.userInfo?.nickname ?? '小朋友'}',
                                 style: const TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.w600),
                               ),
                             ],
@@ -93,6 +96,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 8)),
           SliverToBoxAdapter(child: _buildQuickActions()),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          SliverToBoxAdapter(child: _buildDailyTasks()),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
         ],
         body: _buildTrainingGrid(),
@@ -165,6 +170,189 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// 今日任务区块
+  Widget _buildDailyTasks() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Consumer<DailyTaskProvider>(
+        builder: (context, dailyTask, _) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('今日任务', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  if (!dailyTask.isLoading && dailyTask.tasks.isNotEmpty)
+                    Text(
+                      '${dailyTask.completedCount}/${dailyTask.tasks.length} 完成',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: dailyTask.allCompleted ? Colors.green : Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              if (dailyTask.isLoading)
+                const Center(child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: CircularProgressIndicator(),
+                ))
+              else if (dailyTask.tasks.isEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  alignment: Alignment.center,
+                  child: Text(
+                    dailyTask.errorMessage ?? '暂无今日任务',
+                    style: TextStyle(color: Colors.grey.shade500),
+                  ),
+                )
+              else
+                Column(
+                  children: dailyTask.tasks
+                      .map((task) => _buildDailyTaskCard(task))
+                      .toList(),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildDailyTaskCard(DailyTaskModel task) {
+    final gameType = _trainingTypeToGameType(task.trainingType);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: InkWell(
+        onTap: task.completed ? null : () => _navigateToGame(gameType, task.level),
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: task.completed ? Colors.green.shade50 : Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: task.completed ? Colors.green.shade200 : Colors.grey.shade200,
+              width: 1.5,
+            ),
+            boxShadow: task.completed
+                ? null
+                : [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 6, offset: const Offset(0, 2))],
+          ),
+          child: Row(
+            children: [
+              // 完成/未完成图标
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: task.completed ? Colors.green : Colors.blue.shade50,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  task.completed ? Icons.check : _trainingTypeToIcon(task.trainingType),
+                  color: task.completed ? Colors.white : Colors.blue,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              // 标题和描述
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      task.title,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: task.completed ? Colors.grey.shade500 : Colors.black87,
+                        decoration: task.completed ? TextDecoration.lineThrough : null,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      task.description,
+                      style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                    ),
+                  ],
+                ),
+              ),
+              // 星星奖励
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('⭐', style: TextStyle(fontSize: 14)),
+                      const SizedBox(width: 2),
+                      Text(
+                        '+${task.starReward}',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: task.completed ? Colors.grey : Colors.orange,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (!task.completed)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 4),
+                      child: Icon(Icons.arrow_forward_ios, size: 12, color: Colors.grey),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// trainingType 转 gameType 字符串
+  String _trainingTypeToGameType(int trainingType) {
+    switch (trainingType) {
+      case 1:
+        return 'focus';
+      case 2:
+        return 'schulte';
+      case 3:
+        return 'sound';
+      case 4:
+        return 'match';
+      case 21:
+        return 'flash';
+      case 41:
+        return 'match';
+      default:
+        return 'focus';
+    }
+  }
+
+  /// trainingType 转图标
+  IconData _trainingTypeToIcon(int trainingType) {
+    switch (trainingType) {
+      case 1:
+        return Icons.timer;
+      case 2:
+        return Icons.visibility;
+      case 3:
+        return Icons.headphones;
+      case 4:
+      case 41:
+        return Icons.memory;
+      case 21:
+        return Icons.flash_on;
+      default:
+        return Icons.star;
+    }
+  }
+
   Widget _buildTrainingGrid() {
     final modules = [
       {
@@ -231,7 +419,7 @@ class _HomeScreenState extends State<HomeScreen> {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [module['color'], module['color'].withOpacity(0.7)],
+              colors: [module['color'], (module['color'] as Color).withOpacity(0.7)],
             ),
           ),
           child: Column(

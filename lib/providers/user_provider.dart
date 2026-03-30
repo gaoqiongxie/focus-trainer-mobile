@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/user_model.dart';
 import '../utils/http_util.dart';
 
 class UserProvider extends ChangeNotifier {
   bool _isLoggedIn = false;
-  Map<String, dynamic>? _userInfo;
+  UserModel? _userInfo;
   String? _token;
   String? _errorMessage;
 
   bool get isLoggedIn => _isLoggedIn;
-  Map<String, dynamic>? get userInfo => _userInfo;
+  UserModel? get userInfo => _userInfo;
   String? get errorMessage => _errorMessage;
 
   /// 检查登录状态
@@ -30,7 +31,7 @@ class UserProvider extends ChangeNotifier {
         'phone': phone,
         'password': password,
       });
-      
+
       if (response.statusCode == 200 && response.data['code'] == 200) {
         final data = response.data['data'];
         _token = data['token'];
@@ -57,7 +58,7 @@ class UserProvider extends ChangeNotifier {
         'userType': userType,
         'nickname': nickname,
       });
-      
+
       if (response.statusCode == 200 && response.data['code'] == 200) {
         final data = response.data['data'];
         _token = data['token'];
@@ -79,7 +80,10 @@ class UserProvider extends ChangeNotifier {
     try {
       final response = await HttpUtil.get('/user/profile');
       if (response.statusCode == 200 && response.data['code'] == 200) {
-        _userInfo = response.data['data'];
+        final data = response.data['data'];
+        if (data != null) {
+          _userInfo = UserModel.fromJson(data as Map<String, dynamic>);
+        }
       }
     } catch (e) {
       // 静默处理

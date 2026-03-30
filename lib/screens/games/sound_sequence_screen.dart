@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../providers/training_provider.dart';
 import '../../providers/reward_provider.dart';
+import '../../utils/audio_service.dart';
 
 /// 听觉专注训练 - 声音序列记忆
 /// 听到一组动物叫声序列后，按正确顺序复现
@@ -155,12 +156,19 @@ class _SoundSequenceScreenState extends State<SoundSequenceScreen>
   }
 
   void _playSequence() async {
+    final audioService = AudioService.instance;
+
     for (int i = 0; i < _currentSequence.length; i++) {
       if (!mounted) return;
-      await Future.delayed(const Duration(milliseconds: 600));
+      await Future.delayed(const Duration(milliseconds: 400));
 
       if (!mounted) return;
       final animalIdx = _currentSequence[i];
+
+      // 播放动物声音
+      await audioService.playAnimalSound(animalIdx);
+
+      if (!mounted) return;
       setState(() {
         _listenIndex = i;
         _activeAnimalIndex = animalIdx;
@@ -169,10 +177,9 @@ class _SoundSequenceScreenState extends State<SoundSequenceScreen>
       // 脉冲动画
       _pulseAnimController.forward(from: 0);
 
-      // 触觉反馈
-      HapticFeedback.lightImpact();
-
-      await Future.delayed(const Duration(milliseconds: 500));
+      // 根据动物声音持续时间等待
+      final soundDuration = audioService.getAnimalSoundDuration(animalIdx);
+      await Future.delayed(Duration(milliseconds: soundDuration));
 
       if (!mounted) return;
       setState(() {
@@ -181,7 +188,7 @@ class _SoundSequenceScreenState extends State<SoundSequenceScreen>
     }
 
     // 播放完毕，进入回放阶段
-    await Future.delayed(const Duration(milliseconds: 300));
+    await Future.delayed(const Duration(milliseconds: 400));
     if (!mounted) return;
     setState(() {
       _phase = 'replay';
@@ -192,8 +199,8 @@ class _SoundSequenceScreenState extends State<SoundSequenceScreen>
   void _onAnimalPressed(int animalIndex) {
     if (_phase != 'replay') return;
 
-    // 触觉反馈
-    HapticFeedback.selectionClick();
+    // 播放动物声音
+    AudioService.instance.playAnimalSound(animalIndex);
 
     setState(() {
       _activeAnimalIndex = animalIndex;

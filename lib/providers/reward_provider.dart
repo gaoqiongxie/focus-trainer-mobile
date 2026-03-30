@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import '../models/reward_model.dart';
 import '../utils/http_util.dart';
 
 class RewardProvider extends ChangeNotifier {
   int _starCount = 0;
-  List<Map<String, dynamic>> _badges = [];
+  List<RewardRecordModel> _badges = [];
   int _currentStreak = 0;
   int _maxStreak = 0;
 
   int get starCount => _starCount;
-  List<Map<String, dynamic>> get badges => _badges;
+  List<RewardRecordModel> get badges => _badges;
   int get currentStreak => _currentStreak;
   int get maxStreak => _maxStreak;
 
@@ -17,7 +18,7 @@ class RewardProvider extends ChangeNotifier {
     try {
       final response = await HttpUtil.get('/reward/stars');
       if (response.statusCode == 200 && response.data['code'] == 200) {
-        _starCount = response.data['data'];
+        _starCount = (response.data['data'] as num?)?.toInt() ?? 0;
         notifyListeners();
       }
     } catch (e) {}
@@ -28,7 +29,10 @@ class RewardProvider extends ChangeNotifier {
     try {
       final response = await HttpUtil.get('/reward/badges');
       if (response.statusCode == 200 && response.data['code'] == 200) {
-        _badges = List<Map<String, dynamic>>.from(response.data['data']);
+        final list = response.data['data'] as List<dynamic>? ?? [];
+        _badges = list
+            .map((e) => RewardRecordModel.fromJson(e as Map<String, dynamic>))
+            .toList();
         notifyListeners();
       }
     } catch (e) {}
@@ -39,9 +43,9 @@ class RewardProvider extends ChangeNotifier {
     try {
       final response = await HttpUtil.get('/reward/streak');
       if (response.statusCode == 200 && response.data['code'] == 200) {
-        final data = response.data['data'];
-        _currentStreak = data['currentStreak'] ?? 0;
-        _maxStreak = data['maxStreak'] ?? 0;
+        final data = response.data['data'] as Map<String, dynamic>?;
+        _currentStreak = data?['currentStreak'] as int? ?? 0;
+        _maxStreak = data?['maxStreak'] as int? ?? 0;
         notifyListeners();
       }
     } catch (e) {}

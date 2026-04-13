@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/parent_report_provider.dart';
+import '../ability_evaluation_screen.dart';
 
 /// 家长端训练报告页面
 /// 包含: 仪表板总览、训练趋势、能力分析、训练记录
@@ -257,20 +258,32 @@ class _ParentReportScreenState extends State<ParentReportScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text('🧠 能力分析', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: (levelColors[level] ?? Colors.grey).withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '综合 $totalScore 分 · $level 等级',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: levelColors[level] ?? Colors.grey,
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: (levelColors[level] ?? Colors.grey).withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '综合 $totalScore 分 · $level',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: levelColors[level] ?? Colors.grey,
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const AbilityEvaluationScreen()),
+                    ),
+                    tooltip: '详细能力评估',
+                  ),
+                ],
               ),
             ],
           ),

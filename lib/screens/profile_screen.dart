@@ -4,7 +4,9 @@ import '../models/badge_model.dart';
 import '../providers/user_provider.dart';
 import '../providers/reward_provider.dart';
 import '../providers/training_provider.dart';
+import '../providers/evaluation_provider.dart';
 import 'badge_screen.dart';
+import 'ability_evaluation_screen.dart';
 import 'login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -27,6 +29,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context.read<RewardProvider>().loadBadges(),
       context.read<RewardProvider>().loadStreak(),
       context.read<TrainingProvider>().loadStatistics('week'),
+      context.read<EvaluationProvider>().loadGuide(),
     ]);
   }
 
@@ -103,6 +106,67 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _buildInfoRow('总训练时长', '${((training.statistics?['totalDuration'] ?? 0) ~/ 60)} 分钟'),
               _buildInfoRow('获得星星', '${training.statistics?['totalStars'] ?? 0}'),
             ]),
+
+            const SizedBox(height: 16),
+
+            // 能力评估
+            Consumer<EvaluationProvider>(
+              builder: (context, eval, _) {
+                final ability = eval.ability;
+                return _buildSection('🧠 能力评估', [
+                  InkWell(
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const AbilityEvaluationScreen()),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 48, height: 48,
+                          decoration: BoxDecoration(
+                            color: ability != null
+                                ? _levelColor(ability.abilityLevel).withOpacity(0.15)
+                                : Colors.grey.shade100,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              ability?.abilityLevel ?? '?',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: ability != null ? _levelColor(ability.abilityLevel) : Colors.grey,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                ability != null
+                                    ? '综合 ${ability.totalScore.toStringAsFixed(1)} 分 · ${ability.levelDescription}'
+                                    : '点击进行能力评估',
+                                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                ability != null
+                                    ? '基于近30天训练数据 · ${ability.evaluateDate}'
+                                    : '基于训练数据生成个性化报告',
+                                style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                      ],
+                    ),
+                  ),
+                ]);
+              },
+            ),
 
             const SizedBox(height: 16),
 
@@ -267,5 +331,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         label: const Text('查看全部徽章', style: TextStyle(fontSize: 13)),
       ),
     );
+  }
+
+  Color _levelColor(String level) {
+    switch (level) {
+      case 'A': return const Color(0xFF4CAF50);
+      case 'B': return const Color(0xFF8BC34A);
+      case 'C': return const Color(0xFFFF9800);
+      case 'D': return const Color(0xFFFF5722);
+      default:  return const Color(0xFF9E9E9E);
+    }
   }
 }

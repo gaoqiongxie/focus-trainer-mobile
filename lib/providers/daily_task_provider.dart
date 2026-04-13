@@ -17,6 +17,9 @@ class DailyTaskProvider extends ChangeNotifier {
   /// 是否全部完成
   bool get allCompleted => _tasks.isNotEmpty && _tasks.every((t) => t.completed);
 
+  /// 待领取数量
+  int get claimableCount => _tasks.where((t) => t.completed && !t.claimed).length;
+
   /// 从后端获取今日任务列表
   Future<void> loadDailyTasks() async {
     _isLoading = true;
@@ -24,7 +27,8 @@ class DailyTaskProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await HttpUtil.get('/training/daily-tasks');
+      // 对接后端 /api/daily-task/today 接口
+      final response = await HttpUtil.get('/daily-task/today');
 
       if (response.statusCode == 200 && response.data['code'] == 200) {
         final list = response.data['data'] as List<dynamic>? ?? [];
@@ -42,13 +46,22 @@ class DailyTaskProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 标记任务完成（本地更新，实际完成由训练结果触发）
-  void markTaskCompleted(int taskId) {
-    final index = _tasks.indexWhere((t) => t.taskId == taskId);
-    if (index != -1) {
-      _tasks[index] = _tasks[index].copyWith(completed: true);
-      notifyListeners();
+  /// 领取任务奖励
+  Future<bool> claimReward(int taskId) async {
+    try {
+      final response = await HttpUtil.post('/daily-task/$taskId/claim');
+      if (response.statusCode == 200 && response.data['code'] == 200) {
+        final index = _tasks.indexWhere((t) => t.taskId == taskId);
+        if (index != -1) {
+          _tasks[index] = _tasks[index].copyWith(claimed: true);
+          notifyListeners();
+        }
+        return true;
+      }
+    } catch (e) {
+      debugPrint('领取奖励失败: $e');
     }
+    return false;
   }
 
   /// 检查某个 trainingType+level 对应的任务是否存在并标记完成

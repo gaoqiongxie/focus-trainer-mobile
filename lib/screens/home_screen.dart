@@ -4,6 +4,8 @@ import '../providers/user_provider.dart';
 import '../providers/training_provider.dart';
 import '../providers/reward_provider.dart';
 import '../providers/daily_task_provider.dart';
+import '../providers/notification_provider.dart';
+import '../providers/difficulty_recommendation_provider.dart';
 import '../models/daily_task_model.dart';
 import 'training_screen.dart';
 import 'profile_screen.dart';
@@ -13,6 +15,8 @@ import 'games/flash_number_screen.dart';
 import 'games/card_match_screen.dart';
 import 'games/sound_sequence_screen.dart';
 import 'parent/parent_report_screen.dart';
+import 'recommended_training_screen.dart';
+import 'notifications_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -46,6 +50,46 @@ class _HomeScreenState extends State<HomeScreen> {
             expandedHeight: 200,
             floating: true,
             pinned: true,
+            title: const Text(''), // 空标题，让FlexibleSpaceBar处理
+            actions: [
+              // 通知按钮
+              Consumer<NotificationProvider>(
+                builder: (context, notifProvider, _) {
+                  // 初始加载通知数
+                  if (notifProvider.notifications.isEmpty && !notifProvider.isLoading) {
+                    notifProvider.loadNotifications();
+                  }
+                  return Stack(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.notifications, color: Colors.white),
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+                        ),
+                      ),
+                      if (notifProvider.unreadCount > 0)
+                        Positioned(
+                          right: 8,
+                          top: 8,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                            child: Text(
+                              '${notifProvider.unreadCount}',
+                              style: const TextStyle(color: Colors.white, fontSize: 10),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               title: const Text('专注力训练', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               background: Container(
@@ -96,6 +140,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 8)),
           SliverToBoxAdapter(child: _buildQuickActions()),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          SliverToBoxAdapter(child: _buildRecommendationCard()),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
           SliverToBoxAdapter(child: _buildDailyTasks()),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
@@ -351,6 +397,76 @@ class _HomeScreenState extends State<HomeScreen> {
       default:
         return Icons.star;
     }
+  }
+
+  /// 推荐训练卡片
+  Widget _buildRecommendationCard() {
+    return Consumer<DifficultyRecommendationProvider>(
+      builder: (context, provider, _) {
+        // 首次加载
+        if (provider.recommendations.isEmpty && !provider.isLoading) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            provider.loadRecommendations();
+          });
+        }
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: InkWell(
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const RecommendedTrainingScreen()),
+            ),
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFFFF8C42), Color(0xFFFFB347)],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(color: Colors.orange.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4)),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 56, height: 56,
+                    decoration: BoxDecoration(
+                      color: Colors.white24,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: const Icon(Icons.auto_awesome, color: Colors.white, size: 32),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '个性化推荐',
+                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          provider.recommendations.isNotEmpty
+                              ? '为您推荐 ${provider.recommendations.length} 个训练'
+                              : '基于您的表现生成推荐',
+                          style: const TextStyle(fontSize: 13, color: Colors.white70),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 20),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildTrainingGrid() {

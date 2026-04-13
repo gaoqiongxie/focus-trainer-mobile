@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/parent_report_provider.dart';
+import '../../providers/pdf_export_provider.dart';
 import '../ability_evaluation_screen.dart';
 
 /// 家长端训练报告页面
@@ -15,16 +16,32 @@ class ParentReportScreen extends StatefulWidget {
 class _ParentReportScreenState extends State<ParentReportScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  
+  // 多孩子切换
+  int? _selectedChildId;
+  List<Map<String, dynamic>> _childrenList = [];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _loadChildren();
+  }
+
+  Future<void> _loadChildren() async {
+    // 加载孩子列表（从后端或本地缓存）
+    // 这里模拟一个孩子列表
+    setState(() {
+      _childrenList = [
+        {'childId': null, 'nickname': '当前孩子'},
+      ];
+      _selectedChildId = null;
+    });
     _loadData();
   }
 
   Future<void> _loadData() async {
-    await context.read<ParentReportProvider>().loadAll(trendDays: 7);
+    await context.read<ParentReportProvider>().loadAll(childId: _selectedChildId, trendDays: 7);
   }
 
   @override
@@ -40,7 +57,15 @@ class _ParentReportScreenState extends State<ParentReportScreen>
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FE),
       appBar: AppBar(
-        title: const Text('训练报告', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Row(
+          children: [
+            const Text('训练报告', style: TextStyle(fontWeight: FontWeight.bold)),
+            if (_childrenList.length > 1) ...[
+              const SizedBox(width: 8),
+              _buildChildSelector(),
+            ],
+          ],
+        ),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 0,
@@ -56,6 +81,19 @@ class _ParentReportScreenState extends State<ParentReportScreen>
           ],
         ),
         actions: [
+          // 导出PDF按钮
+          Consumer<PdfExportProvider>(
+            builder: (context, pdfProvider, _) => IconButton(
+              icon: pdfProvider.isExporting
+                  ? const SizedBox(
+                      width: 20, height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.picture_as_pdf),
+              onPressed: pdfProvider.isExporting ? null : _exportPdf,
+              tooltip: '导出PDF报告',
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadData,
@@ -722,5 +760,179 @@ class _ParentReportScreenState extends State<ParentReportScreen>
     final m = s ~/ 60;
     final sec = s % 60;
     return m > 0 ? '${m}分${sec}秒' : '${sec}秒';
+  }
+
+  /// 多孩子切换下拉框
+  Widget _buildChildSelector() {
+    return PopupMenuButton<int?>(
+      onSelected: (childId) {
+        setState(() => _selectedChildId = childId);
+        _loadData();
+      },
+      itemBuilder: (context) => _childrenList.map((child) {
+        return PopupMenuItem<int?>(
+          value: child['childId'] as int?,
+          child: Row(
+            children: [
+              if (child['childId'] == _selectedChildId || 
+                  (child['childId'] == null && _selectedChildId == null))
+                const Icon(Icons.check, size: 18, color: Color(0xFF4A90D9))
+              else
+                const SizedBox(width: 18),
+              const SizedBox(width: 8),
+              Text(child['nickname'] ?? '孩子'),
+            ],
+          ),
+        );
+      }).toList(),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: const Color(0xFF4A90D9).withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.swap_horiz, size: 18, color: Color(0xFF4A90D9)),
+            const SizedBox(width: 4),
+            Text(
+              _getSelectedChildName(),
+              style: const TextStyle(fontSize: 13, color: Color(0xFF4A90D9), fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getSelectedChildName() {
+    final selected = _childrenList.firstWhere(
+      (c) => c['childId'] == _selectedChildId,
+      orElse: () => _childrenList.first,
+    );
+    return selected['nickname'] ?? '孩子';
+  }
+
+  /// 导出PDF报告
+  Future<void> _exportPdf() async {
+    final pdfProvider = context.read<PdfExportProvider>();
+    
+    // 显示导出选项
+    final result = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40, height: 4,
+              decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+            ),
+            const SizedBox(height: 24),
+            const Icon(Icons.picture_as_pdf, size: 48, color: Color(0xFF4A90D9)),
+            const SizedBox(height: 16),
+            const Text('导出PDF报告', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 24),
+            _buildExportOption(
+              icon: Icons.calendar_today,
+              title: '本周报告',
+              subtitle: '导出本周训练数据',
+              onTap: () => Navigator.of(context).pop('week'),
+            ),
+            const SizedBox(height: 12),
+            _buildExportOption(
+              icon: Icons.date_range,
+              title: '本月报告',
+              subtitle: '导出本月训练数据',
+              onTap: () => Navigator.of(context).pop('month'),
+            ),
+            const SizedBox(height: 12),
+            _buildExportOption(
+              icon: Icons.analytics,
+              title: '完整报告',
+              subtitle: '导出所有训练数据',
+              onTap: () => Navigator.of(context).pop('all'),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+
+    if (result == null) return;
+
+    final url = await pdfProvider.exportTrainingReport(
+      childId: _selectedChildId,
+      period: result,
+    );
+
+    if (!mounted) return;
+
+    if (url != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('PDF报告已生成'),
+          action: SnackBarAction(
+            label: '下载',
+            onPressed: () {
+              // TODO: 使用 url_launcher 或其他方式打开PDF
+            },
+          ),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(pdfProvider.errorMessage ?? '导出失败')),
+      );
+    }
+  }
+
+  Widget _buildExportOption({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44, height: 44,
+              decoration: BoxDecoration(
+                color: const Color(0xFF4A90D9).withOpacity(0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: const Color(0xFF4A90D9)),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+          ],
+        ),
+      ),
+    );
   }
 }

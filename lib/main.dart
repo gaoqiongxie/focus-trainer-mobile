@@ -7,6 +7,10 @@ import 'providers/reward_provider.dart';
 import 'providers/parent_report_provider.dart';
 import 'providers/daily_task_provider.dart';
 import 'providers/evaluation_provider.dart';
+import 'providers/difficulty_recommendation_provider.dart';
+import 'providers/notification_provider.dart';
+import 'providers/training_lock_provider.dart';
+import 'providers/pdf_export_provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'utils/http_util.dart';
@@ -32,6 +36,10 @@ class FocusTrainerApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ParentReportProvider()),
         ChangeNotifierProvider(create: (_) => DailyTaskProvider()),
         ChangeNotifierProvider(create: (_) => EvaluationProvider()),
+        ChangeNotifierProvider(create: (_) => DifficultyRecommendationProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider(create: (_) => TrainingLockProvider()),
+        ChangeNotifierProvider(create: (_) => PdfExportProvider()),
       ],
       child: MaterialApp(
         title: AppConfig.appName,

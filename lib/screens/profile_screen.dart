@@ -6,7 +6,11 @@ import '../providers/reward_provider.dart';
 import '../providers/training_provider.dart';
 import '../providers/evaluation_provider.dart';
 import 'badge_screen.dart';
+import 'title_screen.dart';
 import 'ability_evaluation_screen.dart';
+import 'privacy_settings_screen.dart';
+import 'recommended_training_screen.dart';
+import 'notifications_screen.dart';
 import 'login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -174,6 +178,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _buildSection('🏅 徽章墙（${reward.earnedCount}/${reward.badges.length}）', [
               ...reward.badges.take(6).map((badge) => _buildBadgeItem(badge)),
               _buildMoreBadgesButton(),
+            ]),
+
+            const SizedBox(height: 16),
+
+            // 称号墙入口
+            _buildSection('👑 称号墙', [
+              InkWell(
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const TitleScreen()),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 48, height: 48,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFD700).withOpacity(0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Center(
+                        child: Text('👑', style: TextStyle(fontSize: 24)),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('查看全部称号', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                          SizedBox(height: 2),
+                          Text('完成挑战解锁专属称号', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                  ],
+                ),
+              ),
             ]),
 
             const SizedBox(height: 32),

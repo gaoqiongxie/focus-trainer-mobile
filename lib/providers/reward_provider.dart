@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
-import '../models/reward_model.dart';
+import '../models/badge_model.dart';
 import '../utils/http_util.dart';
 
 class RewardProvider extends ChangeNotifier {
   int _starCount = 0;
-  List<RewardRecordModel> _badges = [];
+  List<BadgeModel> _badges = [];
   int _currentStreak = 0;
   int _maxStreak = 0;
 
   int get starCount => _starCount;
-  List<RewardRecordModel> get badges => _badges;
+  List<BadgeModel> get badges => _badges;
   int get currentStreak => _currentStreak;
   int get maxStreak => _maxStreak;
+
+  /// 已解锁徽章数量
+  int get earnedCount => _badges.where((b) => b.earned).length;
 
   /// 加载星星数量
   Future<void> loadStarCount() async {
@@ -31,7 +34,7 @@ class RewardProvider extends ChangeNotifier {
       if (response.statusCode == 200 && response.data['code'] == 200) {
         final list = response.data['data'] as List<dynamic>? ?? [];
         _badges = list
-            .map((e) => RewardRecordModel.fromJson(e as Map<String, dynamic>))
+            .map((e) => BadgeModel.fromJson(e as Map<String, dynamic>))
             .toList();
         notifyListeners();
       }

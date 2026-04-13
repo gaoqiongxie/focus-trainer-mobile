@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/badge_model.dart';
 import '../providers/user_provider.dart';
 import '../providers/reward_provider.dart';
 import '../providers/training_provider.dart';
+import 'badge_screen.dart';
 import 'login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -105,8 +107,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 16),
 
             // 徽章墙
-            _buildSection('🏅 徽章墙', [
-              ...reward.badges.map((badge) => _buildBadgeItem(badge)),
+            _buildSection('🏅 徽章墙（${reward.earnedCount}/${reward.badges.length}）', [
+              ...reward.badges.take(6).map((badge) => _buildBadgeItem(badge)),
+              _buildMoreBadgesButton(),
             ]),
 
             const SizedBox(height: 32),
@@ -197,36 +200,71 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildBadgeItem(Map<String, dynamic> badge) {
-    final earned = badge['earned'] == true;
+  Widget _buildBadgeItem(BadgeModel badge) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Container(
-            width: 40, height: 40,
-            decoration: BoxDecoration(
-              color: earned ? Colors.amber.withOpacity(0.2) : Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              earned ? Icons.emoji_events : Icons.lock_outline,
-              color: earned ? Colors.amber : Colors.grey,
+          Opacity(
+            opacity: badge.opacity,
+            child: Container(
+              width: 40, height: 40,
+              decoration: BoxDecoration(
+                color: badge.earned
+                    ? Colors.amber.withOpacity(0.2)
+                    : Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Center(
+                child: Text(badge.icon, style: const TextStyle(fontSize: 22)),
+              ),
             ),
           ),
           const SizedBox(width: 12),
-          Text(
-            badge['name'],
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: earned ? Colors.black87 : Colors.grey,
+          Opacity(
+            opacity: badge.opacity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  badge.name,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: badge.earned ? Colors.black87 : Colors.grey,
+                  ),
+                ),
+                Text(
+                  badge.description,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: badge.earned ? Colors.grey.shade600 : Colors.grey,
+                  ),
+                ),
+              ],
             ),
           ),
           const Spacer(),
-          if (earned)
-            const Icon(Icons.check_circle, color: Colors.green, size: 20),
+          if (badge.earned)
+            const Icon(Icons.check_circle, color: Colors.green, size: 20)
+          else
+            Icon(Icons.lock_outline, color: Colors.grey.shade400, size: 18),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMoreBadgesButton() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: TextButton.icon(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const BadgeScreen()),
+          );
+        },
+        icon: const Icon(Icons.arrow_forward_ios, size: 14),
+        label: const Text('查看全部徽章', style: TextStyle(fontSize: 13)),
       ),
     );
   }

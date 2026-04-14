@@ -5,6 +5,7 @@ import '../providers/user_provider.dart';
 import '../providers/reward_provider.dart';
 import '../providers/training_provider.dart';
 import '../providers/evaluation_provider.dart';
+import '../widgets/error_snackbar_listener.dart';
 import 'badge_screen.dart';
 import 'title_screen.dart';
 import 'ability_evaluation_screen.dart';
@@ -41,8 +42,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('我的'), elevation: 0),
-      body: Consumer3<UserProvider, RewardProvider, TrainingProvider>(
-        builder: (context, user, reward, training, _) => ListView(
+      body: ErrorSnackbarListener(
+        providers: [
+          context.read<RewardProvider>(),
+          context.read<TrainingProvider>(),
+          context.read<EvaluationProvider>(),
+        ],
+        child: Consumer3<UserProvider, RewardProvider, TrainingProvider>(
+          builder: (context, user, reward, training, _) => ListView(
           children: [
             // 用户信息卡片
             Container(
@@ -244,6 +251,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 32),
           ],
         ),
+      ),
       ),
     );
   }

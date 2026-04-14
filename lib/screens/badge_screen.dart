@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/badge_model.dart';
 import '../providers/reward_provider.dart';
+import '../widgets/error_snackbar_listener.dart';
 
 class BadgeScreen extends StatefulWidget {
   const BadgeScreen({super.key});
@@ -38,8 +39,10 @@ class _BadgeScreenState extends State<BadgeScreen> {
         elevation: 0,
         centerTitle: true,
       ),
-      body: Consumer<RewardProvider>(
-        builder: (context, rp, _) {
+      body: ErrorSnackbarListener(
+        providers: [context.read<RewardProvider>()],
+        child: Consumer<RewardProvider>(
+          builder: (context, rp, _) {
           if (rp.badges.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -155,6 +158,7 @@ class _BadgeScreenState extends State<BadgeScreen> {
             ),
           ),
         ],
+      ),
       ),
     );
   }

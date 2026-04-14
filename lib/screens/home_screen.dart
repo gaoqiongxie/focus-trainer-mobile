@@ -7,6 +7,7 @@ import '../providers/daily_task_provider.dart';
 import '../providers/notification_provider.dart';
 import '../providers/difficulty_recommendation_provider.dart';
 import '../models/daily_task_model.dart';
+import '../widgets/error_snackbar_listener.dart';
 import 'training_screen.dart';
 import 'profile_screen.dart';
 import 'game_selection_screen.dart';
@@ -44,7 +45,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: NestedScrollView(
+      body: ErrorSnackbarListener(
+        providers: [
+          context.read<RewardProvider>(),
+          context.read<TrainingProvider>(),
+          context.read<DailyTaskProvider>(),
+        ],
+        child: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) => [
           SliverAppBar(
             expandedHeight: 200,
@@ -190,6 +197,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ],
+      ),
       ),
     );
   }

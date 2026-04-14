@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/parent_report_provider.dart';
 import '../../providers/pdf_export_provider.dart';
+import '../../widgets/error_snackbar_listener.dart';
 import '../ability_evaluation_screen.dart';
 
 /// 家长端训练报告页面
@@ -100,16 +101,19 @@ class _ParentReportScreenState extends State<ParentReportScreen>
           ),
         ],
       ),
-      body: provider.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _buildOverviewTab(provider),
-                _buildTrendTab(provider),
-                _buildRecordsTab(provider),
-              ],
-            ),
+      body: ErrorSnackbarListener(
+        providers: [context.read<ParentReportProvider>()],
+        child: provider.isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildOverviewTab(provider),
+                  _buildTrendTab(provider),
+                  _buildRecordsTab(provider),
+                ],
+              ),
+      ),
     );
   }
 

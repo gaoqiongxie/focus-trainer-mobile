@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/training_provider.dart';
 import '../providers/reward_provider.dart';
 import '../config/app_config.dart';
+import '../widgets/error_snackbar_listener.dart';
 
 class TrainingScreen extends StatefulWidget {
   final int trainingType;
@@ -145,41 +146,44 @@ class _TrainingScreenState extends State<TrainingScreen> with TickerProviderStat
 
     return Scaffold(
       appBar: AppBar(title: Text(typeName), elevation: 0),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 120, height: 120,
-                decoration: BoxDecoration(
-                  color: typeColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Icon(Icons.play_arrow, size: 60, color: typeColor),
-              ),
-              const SizedBox(height: 24),
-              Text(typeName, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Text('难度等级 ${widget.level}', style: TextStyle(fontSize: 16, color: Colors.grey.shade600)),
-              const SizedBox(height: 8),
-              Text('训练时长 ${_formatTime(widget.duration)}', style: TextStyle(fontSize: 16, color: Colors.grey.shade600)),
-              const SizedBox(height: 40),
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _startTraining,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: typeColor,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+      body: ErrorSnackbarListener(
+        providers: [context.read<TrainingProvider>(), context.read<RewardProvider>()],
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 120, height: 120,
+                  decoration: BoxDecoration(
+                    color: typeColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(30),
                   ),
-                  child: const Text('开始训练', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  child: Icon(Icons.play_arrow, size: 60, color: typeColor),
                 ),
-              ),
-            ],
+                const SizedBox(height: 24),
+                Text(typeName, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Text('难度等级 ${widget.level}', style: TextStyle(fontSize: 16, color: Colors.grey.shade600)),
+                const SizedBox(height: 8),
+                Text('训练时长 ${_formatTime(widget.duration)}', style: TextStyle(fontSize: 16, color: Colors.grey.shade600)),
+                const SizedBox(height: 40),
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: _startTraining,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: typeColor,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                    ),
+                    child: const Text('开始训练', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -200,12 +204,14 @@ class _TrainingScreenState extends State<TrainingScreen> with TickerProviderStat
           ),
         ],
       ),
-      body: WillPopScope(
-        onWillPop: () async {
-          _interruptTraining();
-          return false;
-        },
-        child: Center(
+      body: ErrorSnackbarListener(
+        providers: [context.read<TrainingProvider>()],
+        child: WillPopScope(
+          onWillPop: () async {
+            _interruptTraining();
+            return false;
+          },
+          child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -267,6 +273,7 @@ class _TrainingScreenState extends State<TrainingScreen> with TickerProviderStat
             ],
           ),
         ),
+      ),
       ),
     );
   }

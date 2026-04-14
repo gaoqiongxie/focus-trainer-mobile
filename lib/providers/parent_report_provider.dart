@@ -4,6 +4,9 @@ import '../utils/http_util.dart';
 /// 家长端数据报告 Provider
 class ParentReportProvider extends ChangeNotifier {
   bool _isLoading = false;
+  String? _errorMessage;
+
+  String? get errorMessage => _errorMessage;
 
   // 仪表板数据
   Map<String, dynamic>? _dashboard;
@@ -42,7 +45,8 @@ class ParentReportProvider extends ChangeNotifier {
         _dashboard = response.data['data'];
       }
     } catch (e) {
-      // 静默处理
+      _errorMessage = '加载仪表板失败';
+      debugPrint('[ParentReportProvider] loadDashboard error: $e');
     }
     _isLoading = false;
     notifyListeners();
@@ -59,7 +63,8 @@ class ParentReportProvider extends ChangeNotifier {
         _trend = List<Map<String, dynamic>>.from(response.data['data']);
       }
     } catch (e) {
-      // 静默处理
+      _errorMessage = '加载趋势数据失败';
+      debugPrint('[ParentReportProvider] loadTrend error: $e');
     }
     notifyListeners();
   }
@@ -74,7 +79,8 @@ class ParentReportProvider extends ChangeNotifier {
         _ability = response.data['data'];
       }
     } catch (e) {
-      // 静默处理
+      _errorMessage = '加载能力分析失败';
+      debugPrint('[ParentReportProvider] loadAbility error: $e');
     }
     notifyListeners();
   }
@@ -95,7 +101,8 @@ class ParentReportProvider extends ChangeNotifier {
         _currentPage = page;
       }
     } catch (e) {
-      // 静默处理
+      _errorMessage = '加载训练记录失败';
+      debugPrint('[ParentReportProvider] loadRecords error: $e');
     }
     notifyListeners();
   }
@@ -110,7 +117,8 @@ class ParentReportProvider extends ChangeNotifier {
         _weeklyReport = response.data['data'];
       }
     } catch (e) {
-      // 静默处理
+      _errorMessage = '加载周报失败';
+      debugPrint('[ParentReportProvider] loadWeeklyReport error: $e');
     }
     notifyListeners();
   }

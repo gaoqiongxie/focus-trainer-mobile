@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/badge_model.dart';
 import '../utils/http_util.dart';
@@ -7,11 +8,13 @@ class RewardProvider extends ChangeNotifier {
   List<BadgeModel> _badges = [];
   int _currentStreak = 0;
   int _maxStreak = 0;
+  String? _errorMessage;
 
   int get starCount => _starCount;
   List<BadgeModel> get badges => _badges;
   int get currentStreak => _currentStreak;
   int get maxStreak => _maxStreak;
+  String? get errorMessage => _errorMessage;
 
   /// 已解锁徽章数量
   int get earnedCount => _badges.where((b) => b.earned).length;
@@ -24,7 +27,10 @@ class RewardProvider extends ChangeNotifier {
         _starCount = (response.data['data'] as num?)?.toInt() ?? 0;
         notifyListeners();
       }
-    } catch (e) {}
+    } catch (e) {
+      _errorMessage = '加载星星数量失败';
+      debugPrint('[RewardProvider] loadStarCount error: $e');
+    }
   }
 
   /// 加载徽章列表
@@ -38,7 +44,10 @@ class RewardProvider extends ChangeNotifier {
             .toList();
         notifyListeners();
       }
-    } catch (e) {}
+    } catch (e) {
+      _errorMessage = '加载徽章列表失败';
+      debugPrint('[RewardProvider] loadBadges error: $e');
+    }
   }
 
   /// 加载连续打卡
@@ -51,6 +60,9 @@ class RewardProvider extends ChangeNotifier {
         _maxStreak = data?['maxStreak'] as int? ?? 0;
         notifyListeners();
       }
-    } catch (e) {}
+    } catch (e) {
+      _errorMessage = '加载连续打卡失败';
+      debugPrint('[RewardProvider] loadStreak error: $e');
+    }
   }
 }

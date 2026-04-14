@@ -179,7 +179,12 @@ class _ParentReportScreenState extends State<ParentReportScreen>
             radius: 28,
             backgroundColor: Colors.white24,
             child: (child['avatar'] != null && child['avatar'].toString().isNotEmpty)
-                ? ClipOval(child: Image.network(child['avatar'], width: 56, height: 56, fit: BoxFit.cover))
+                ? ClipOval(child: Image.network(
+                    child['avatar'],
+                    width: 56, height: 56, fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.child_care, size: 28, color: Colors.white),
+                  ))
                 : const Icon(Icons.child_care, size: 32, color: Colors.white),
           ),
           const SizedBox(width: 16),

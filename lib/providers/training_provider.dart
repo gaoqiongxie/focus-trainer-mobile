@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/training_model.dart';
 import '../utils/http_util.dart';
@@ -8,16 +9,24 @@ class TrainingProvider extends ChangeNotifier {
   Map<String, dynamic>? _statistics;
   TrainingRecordModel? _currentTraining;
   bool _isLoading = false;
+  String? _errorMessage;
 
   List<TrainingConfigModel> get configs => _configs;
   List<TrainingRecordModel> get records => _records;
   Map<String, dynamic>? get statistics => _statistics;
   TrainingRecordModel? get currentTraining => _currentTraining;
   bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
+
+  void _clearError() {
+    _errorMessage = null;
+    notifyListeners();
+  }
 
   /// 获取训练配置列表
   Future<void> loadConfigs({int? trainingType}) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
@@ -32,7 +41,8 @@ class TrainingProvider extends ChangeNotifier {
             .toList();
       }
     } catch (e) {
-      // 静默处理
+      _errorMessage = '加载训练配置失败';
+      debugPrint('[TrainingProvider] loadConfigs error: $e');
     }
 
     _isLoading = false;
@@ -41,6 +51,7 @@ class TrainingProvider extends ChangeNotifier {
 
   /// 开始训练
   Future<TrainingRecordModel?> startTraining(int trainingType, int level, int duration) async {
+    _errorMessage = null;
     try {
       final response = await HttpUtil.post('/training/start', data: {
         'trainingType': trainingType,
@@ -55,15 +66,19 @@ class TrainingProvider extends ChangeNotifier {
           notifyListeners();
           return _currentTraining;
         }
+      } else {
+        _errorMessage = response.data['msg'] ?? '开始训练失败';
       }
     } catch (e) {
-      // 静默处理
+      _errorMessage = '网络错误，开始训练失败';
+      debugPrint('[TrainingProvider] startTraining error: $e');
     }
     return null;
   }
 
   /// 完成训练
   Future<bool> completeTraining(int recordId, int actualDuration, int interruptCount, double accuracy, int score) async {
+    _errorMessage = null;
     try {
       final response = await HttpUtil.post('/training/complete', data: {
         'recordId': recordId,
@@ -77,9 +92,12 @@ class TrainingProvider extends ChangeNotifier {
         _currentTraining = null;
         notifyListeners();
         return true;
+      } else {
+        _errorMessage = response.data['msg'] ?? '提交训练结果失败';
       }
     } catch (e) {
-      // 静默处理
+      _errorMessage = '网络错误，提交失败';
+      debugPrint('[TrainingProvider] completeTraining error: $e');
     }
     return false;
   }
@@ -94,7 +112,8 @@ class TrainingProvider extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      // 静默处理
+      _errorMessage = '加载统计数据失败';
+      debugPrint('[TrainingProvider] loadStatistics error: $e');
     }
   }
 
@@ -115,7 +134,8 @@ class TrainingProvider extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      // 静默处理
+      _errorMessage = '加载训练记录失败';
+      debugPrint('[TrainingProvider] loadRecords error: $e');
     }
   }
 
@@ -128,7 +148,7 @@ class TrainingProvider extends ChangeNotifier {
       _currentTraining = null;
       notifyListeners();
     } catch (e) {
-      // 静默处理
+      debugPrint('[TrainingProvider] interruptTraining error: $e');
     }
   }
 }

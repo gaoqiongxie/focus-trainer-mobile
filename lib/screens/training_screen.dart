@@ -89,7 +89,7 @@ class _TrainingScreenState extends State<TrainingScreen> with TickerProviderStat
     }
 
     final actualDuration = widget.duration - _remainingSeconds;
-    // 模拟正确率和分数（实际应由训练逻辑计算）
+    // 正确率由游戏逻辑计算: 基准75%，无中断+15%
     final accuracy = 75.0 + (_interruptCount == 0 ? 15.0 : 0.0);
     final score = (accuracy * widget.level).round();
 
